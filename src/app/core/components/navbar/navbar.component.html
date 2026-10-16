@@ -1,0 +1,38 @@
+<header class="header">
+  <div class="header-content">
+    <a routerLink="/semillas" class="brand">
+      <div class="brand-icon">
+        <span class="material-symbols-outlined">eco</span>
+      </div>
+      <span class="brand-text">AgroEco</span>
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/semillas" routerLinkActive="active" class="nav-item">Semillas</a>
+      <a routerLink="/clientes" routerLinkActive="active" class="nav-item">Clientes</a>
+    </nav>
+
+    <div class="actions">
+      <button 
+        class="icon-btn text-size-btn" 
+        (click)="toggleLargeText()" 
+        [title]="isLargeText ? 'Tamaño de letra normal' : 'Aumentar tamaño de letra'">
+        T
+      </button>
+
+      <button 
+        class="icon-btn contrast-btn" 
+        (click)="toggleHighContrast()" 
+        [title]="isHighContrast ? 'Modo estándar' : 'Modo alto contraste'">
+        <span class="material-symbols-outlined">contrast</span>
+      </button>
+
+      <a routerLink="/cotizacion" class="cotizar-btn">
+        <span class="material-symbols-outlined cart-icon">shopping_cart</span>
+        <span class="btn-text">Pedir cotización</span>
+        <span class="cart-badge" *ngIf="cotizacionService.count() > 0">{{ cotizacionService.count() }}</span>
+      </a>
+    </div>
+  </div>
+  <div class="brand-stripe"></div>
+</header>

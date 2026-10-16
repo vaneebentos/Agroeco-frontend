@@ -1,0 +1,132 @@
+<div class="cotizacion-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-title-box">
+      <div class="title-with-icon">
+        <span class="material-symbols-outlined title-icon">shopping_cart</span>
+        <h1>Solicitud de cotización</h1>
+      </div>
+      <p class="subtitle">AgroEco no publica precios: cargá tu pedido por hectárea y te cotizamos por correo.</p>
+    </div>
+
+    <!-- Feedback messages -->
+    <div class="alert-box success-alert" *ngIf="submitSuccess()">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ submitSuccess() }}</span>
+    </div>
+
+    <div class="alert-box error-alert" *ngIf="submitError()">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ submitError() }}</span>
+    </div>
+
+    <!-- Main 2-column layout -->
+    <div class="cotizacion-columns-grid">
+      <!-- Left: Tu carga de productos -->
+      <div class="left-col">
+        <h2 class="section-title">Tu carga de productos</h2>
+
+        <div class="cart-items-list" *ngIf="cotizacionService.items().length > 0; else emptyCart">
+          <div class="cart-item-card" *ngFor="let item of cotizacionService.items()">
+            <div class="item-header">
+              <span class="item-name">{{ item.semilla.nombre }}</span>
+              <button 
+                class="trash-btn" 
+                (click)="removeItem(item.semillaId)" 
+                title="Eliminar producto">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+
+            <div class="item-fields">
+              <div class="field-group">
+                <label>Hectáreas</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  [ngModel]="item.hectareas" 
+                  (ngModelChange)="updateItem(item.semillaId, $event, item.temporada)" 
+                />
+              </div>
+
+              <div class="field-group">
+                <label>Temporada</label>
+                <select 
+                  [ngModel]="item.temporada" 
+                  (ngModelChange)="updateItem(item.semillaId, item.hectareas, $event)">
+                  <option *ngFor="let t of item.semilla.temporadasDisponibles" [value]="t">{{ t }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Yellow Bar -->
+          <div class="total-bar">
+            <span class="total-text">Total: {{ cotizacionService.totalHectareas() }} ha</span>
+            <button class="vaciar-btn" (click)="clearAll()">Vaciar</button>
+          </div>
+        </div>
+
+        <ng-template #emptyCart>
+          <div class="empty-cart-card">
+            <span class="material-symbols-outlined empty-cart-icon">remove_shopping_cart</span>
+            <p>No tenés productos cargados en tu solicitud de cotización.</p>
+            <a routerLink="/semillas" class="btn btn-outline">Ir a semillas</a>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Right: Datos del productor -->
+      <div class="right-col">
+        <h2 class="section-title">Datos del productor</h2>
+
+        <div class="producer-form-card">
+          <div class="form-row">
+            <label>Nombre y apellido *</label>
+            <input type="text" [(ngModel)]="formData.nombreApellido" placeholder="Ej: Juan Pérez" />
+          </div>
+
+          <div class="form-row">
+            <label>Establecimiento</label>
+            <input type="text" [(ngModel)]="formData.establecimiento" placeholder="Ej: La Esperanza" />
+          </div>
+
+          <div class="form-row">
+            <label>Localidad / Zona</label>
+            <input type="text" [(ngModel)]="formData.localidadZona" placeholder="Ej: Pergamino - Buenos Aires" />
+          </div>
+
+          <div class="form-row">
+            <label>Teléfono</label>
+            <input type="tel" [(ngModel)]="formData.telefono" placeholder="Ej: +54 9 2477 123456" />
+          </div>
+
+          <div class="form-row">
+            <label>Correo *</label>
+            <input type="email" [(ngModel)]="formData.correo" placeholder="Ej: productor@agro.com" />
+          </div>
+
+          <div class="form-row">
+            <label>Comentarios</label>
+            <textarea [(ngModel)]="formData.comentarios" rows="3" placeholder="Aclaraciones sobre tipo de suelo, entrega, etc."></textarea>
+          </div>
+
+          <!-- Vista previa del mensaje -->
+          <div class="preview-box">
+            <span class="preview-title">VISTA PREVIA DEL MENSAJE</span>
+            <pre class="preview-content">{{ previewMessage() }}</pre>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            class="btn btn-primary submit-btn" 
+            [disabled]="isSubmitting()"
+            (click)="enviarSolicitud()">
+            <span class="material-symbols-outlined">mail</span>
+            <span>{{ isSubmitting() ? 'Enviando...' : 'Enviar solicitud por correo' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
