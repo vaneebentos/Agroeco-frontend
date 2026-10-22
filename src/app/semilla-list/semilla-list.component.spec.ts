@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SeedFormComponent } from './seed-form.component';
+import { SemillaListComponent } from './semilla-list.component';
 
-describe('SeedFormComponent', () => {
-  let component: SeedFormComponent;
-  let fixture: ComponentFixture<SeedFormComponent>;
+describe('SemillaListComponent', () => {
+  let component: SemillaListComponent;
+  let fixture: ComponentFixture<SemillaListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [SeedFormComponent]
+      imports: [SemillaListComponent]
     })
     .compileComponents();
     
-    fixture = TestBed.createComponent(SeedFormComponent);
+    fixture = TestBed.createComponent(SemillaListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

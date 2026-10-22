@@ -1,8 +1,8 @@
-import { Seed } from './seed.model';
+import { Semilla } from './semilla.model';
 
 export interface CartItem {
   semillaId: number;
-  semilla: Seed;
+  semilla: Semilla;
   hectareas: number;
   temporada: string;
 }

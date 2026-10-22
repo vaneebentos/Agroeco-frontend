@@ -7,7 +7,7 @@ import { Semilla } from './semilla';
 @Injectable({
   providedIn: 'root'
 })
-export class SeedService {
+export class SemillaService {
 
   private readonly apiUrl = 'http://localhost:3000/semillas';
 

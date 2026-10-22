@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CartItem, CotizacionPayload, ProducerFormData } from '../../shared/models/cotizacion.model';
-import { Seed } from '../../shared/models/seed.model';
+import { Semilla } from '../../shared/models/semilla.model';
 
 @Injectable({
   providedIn: 'root'
@@ -25,10 +25,10 @@ export class CotizacionService {
 
   constructor(private http: HttpClient) {}
 
-  addItem(seed: Seed, hectareas: number = 50, temporada?: string) {
+  addItem(semilla: Semilla, hectareas: number = 50, temporada?: string) {
     const current = this.cartItems();
-    const existingIndex = current.findIndex(i => i.semillaId === seed.id);
-    const selectedTemporada = temporada || seed.temporadasDisponibles?.[0] || '2025/26 Temprana';
+    const existingIndex = current.findIndex(i => i.semillaId === Number(semilla.id));
+    const selectedTemporada = temporada || semilla.temporadasDisponibles?.[0] || '2025/26 Temprana';
 
     if (existingIndex > -1) {
       const updated = [...current];
@@ -40,8 +40,8 @@ export class CotizacionService {
       this.saveCart(updated);
     } else {
       const newItem: CartItem = {
-        semillaId: seed.id,
-        semilla: seed,
+        semillaId: Number(semilla.id),
+        semilla: semilla,
         hectareas: hectareas,
         temporada: selectedTemporada
       };
