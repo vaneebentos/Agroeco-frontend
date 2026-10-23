@@ -143,6 +143,7 @@ crearCliente(): void {
     this.mensaje = '';
   }
 
+
   // Guardar los cambios del cliente
   guardarEdicion(): void {
     if (this.clienteEditandoId === null) {
@@ -162,10 +163,13 @@ crearCliente(): void {
         },
         error: (err) => {
           console.error('Error al actualizar cliente:', err);
-          this.error = 'No se pudo actualizar el cliente.';
+
+          this.error =
+            err.error?.message || 'No se pudo actualizar el cliente.';
         }
       });
   }
+
 
   // Cancelar la edición
   cancelarEdicion(): void {
