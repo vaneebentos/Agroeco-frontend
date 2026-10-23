@@ -73,6 +73,17 @@ export class CotizacionComponent {
     }
   }
 
+  agregarSemillaEjemplo() {
+    this.cotizacionService.addItem({
+      id: 1,
+      nombre: 'LG 30646',
+      cultivo: 'Maíz',
+      tipo: 'Híbrido',
+      descripcion: 'Estabilidad y potencial en todos los ambientes.',
+      temporadasDisponibles: ['2025/26 Temprana', '2025/26 Tardía']
+    }, 50, '2025/26 Temprana');
+  }
+
   enviarSolicitud() {
     if (this.cotizacionService.items().length === 0) {
       alert('Tu lista de productos está vacía. Selecciona semillas para cotizar.');
@@ -90,14 +101,15 @@ export class CotizacionComponent {
 
     this.cotizacionService.enviarCotizacion(this.formData).subscribe({
       next: (res) => {
+        const clienteMail = this.formData.correo;
         this.isSubmitting.set(false);
-        this.submitSuccess.set('¡Tu solicitud de cotización fue enviada con éxito! Nos contactaremos a la brevedad.');
+        this.submitSuccess.set(`¡Tu solicitud de cotización fue registrada con éxito! Se ha enviado la notificación por correo electrónico a ${clienteMail} y al equipo comercial.`);
         this.cotizacionService.clearCart();
       },
       error: (err) => {
         this.isSubmitting.set(false);
         console.warn('Error al conectar con AgroEco_API:', err);
-        this.submitSuccess.set('¡Solicitud registrada localmente! (Nota: Asegúrate de que AgroEco_API esté ejecutándose en http://localhost:3000 para sincronización directa en base de datos).');
+        this.submitError.set('No se pudo conectar con el servidor (http://localhost:3000). Asegúrate de que la API esté en ejecución para enviar el correo y registrar la cotización.');
       }
     });
   }

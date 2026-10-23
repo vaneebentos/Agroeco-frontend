@@ -15,6 +15,9 @@ export interface CotizacionPayload {
   semillas: {
     semilla_id: number;
     cantidad: number;
+    nombre?: string;
+    cultivo?: string;
+    temporada?: string;
   }[];
 }
 

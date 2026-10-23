@@ -71,7 +71,10 @@ export class CotizacionService {
   enviarCotizacion(formData: ProducerFormData): Observable<any> {
     const semillasPayload = this.cartItems().map(item => ({
       semilla_id: item.semillaId,
-      cantidad: item.hectareas
+      cantidad: item.hectareas,
+      nombre: item.semilla?.nombre,
+      cultivo: item.semilla?.cultivo,
+      temporada: item.temporada
     }));
 
     const observacionesGeneradas = `Establecimiento: ${formData.establecimiento || 'No especificado'} | Localidad: ${formData.localidadZona || 'No especificado'}. Comentarios: ${formData.comentarios || 'Sin comentarios adicionales.'}`;
