@@ -66,6 +66,8 @@ export class ClienteListComponent implements OnInit {
   cerrarFormularioConEscape(): void {
     if (this.mostrarFormulario) {
       this.cerrarFormulario();
+    } else if (this.clienteEditandoId !== null) {
+      this.cancelarEdicion();
     }
   }
 
@@ -101,24 +103,26 @@ export class ClienteListComponent implements OnInit {
     });
   }
 
-  // Crear un cliente
-  crearCliente(): void {
-    this.error = '';
-    this.mensaje = '';
+// Crear un cliente
+crearCliente(): void {
+  this.error = '';
+  this.mensaje = '';
 
-    this.clienteService.crearCliente(this.nuevoCliente).subscribe({
-      next: (respuesta) => {
-        this.mensaje = respuesta.message;
+  this.clienteService.crearCliente(this.nuevoCliente).subscribe({
+    next: (respuesta) => {
+      this.mensaje = respuesta.message;
 
-        this.cerrarFormulario();
-        this.cargarClientes();
-      },
-      error: (err) => {
-        console.error('Error al crear cliente:', err);
-        this.error = 'No se pudo guardar el cliente.';
-      }
-    });
-  }
+      this.cerrarFormulario();
+      this.cargarClientes();
+    },
+    error: (err) => {
+      console.error('Error al crear cliente:', err);
+
+      this.error =
+        err.error?.message || 'No se pudo guardar el cliente.';
+    }
+  });
+}
 
   // Cargar los datos del cliente seleccionado
   editarCliente(cliente: Cliente): void {
@@ -161,6 +165,7 @@ export class ClienteListComponent implements OnInit {
   // Cancelar la edición
   cancelarEdicion(): void {
     this.clienteEditandoId = null;
+    this.error = '';
 
     this.clienteEditando = {
       nombre: '',
