@@ -1,4 +1,114 @@
-/* You can add global styles to this file, and also import other style files */
+/* AgroEco Design System Variables */
+:root {
+  --agro-green: #107c41;
+  --agro-green-dark: #0b582e;
+  --agro-green-light: #eaf6ed;
+  --agro-yellow: #f59e0b;
+  --agro-yellow-light: #fef9c3;
+  --agro-red: #c91424;
+  --agro-red-hover: #a10f1c;
+  --agro-red-light: #fee2e2;
+  --agro-text: #1f2937;
+  --agro-text-muted: #6b7280;
+  --agro-border: #e2e8f0;
+  --agro-bg: #f8fafc;
+  --agro-card-bg: #ffffff;
+  --agro-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --agro-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --agro-radius: 8px;
+  --agro-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --base-font-size: 16px;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body.large-text {
+  --base-font-size: 18px;
+}
+
+body.high-contrast {
+  --agro-bg: #ffffff;
+  --agro-text: #000000;
+  --agro-border: #000000;
+  --agro-green: #054823;
+  --agro-red: #8f0815;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--agro-font);
+  font-size: var(--base-font-size);
+  color: var(--agro-text);
+  background-color: var(--agro-bg);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem 1rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-bottom: 5.5rem;
+  }
+}
+
+/* Global button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--agro-radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn.btn-primary {
+  background-color: var(--agro-red);
+  color: white;
+}
+
+.btn.btn-primary:hover {
+  background-color: var(--agro-red-hover);
+}
+
+.btn.btn-outline {
+  background-color: white;
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.btn.btn-outline:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn.btn-green {
+  background-color: var(--agro-green);
+  color: white;
+}
+
+.btn.btn-green:hover {
+  background-color: var(--agro-green-dark);
+}

@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { SeedService } from './seed.service';
+import { SemillaService } from './semilla.service';
 
-describe('SeedService', () => {
-  let service: SeedService;
+describe('SemillaService', () => {
+  let service: SemillaService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(SeedService);
+    service = TestBed.inject(SemillaService);
   });
 
   it('should be created', () => {
