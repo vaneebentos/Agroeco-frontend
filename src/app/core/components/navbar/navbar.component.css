@@ -1,205 +1,158 @@
-.lehmann-header {
-  background: linear-gradient(90deg, #1b4332 0%, #2d6a4f 60%, #1b4332 100%);
+.header {
+  background-color: var(--agro-green, #107c41);
+  color: #ffffff;
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14);
-  border-bottom: 3px solid #c91424; /* Detalle LG */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.header-container {
-  max-width: 1380px;
+.header-content {
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0.65rem 1.25rem;
+  padding: 0.65rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
 }
 
-/* Bloque Logo estilo Lehmann */
-.brand-box {
-  background: #ffffff;
-  color: #1b4332;
-  padding: 0.45rem 1rem;
-  border-radius: 10px;
+.brand {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.6rem;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-}
-
-.brand-logo-icon {
-  background: linear-gradient(135deg, #2d6a4f, #74c69d);
-  color: #ffffff;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-}
-
-.brand-titles {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.brand-main {
-  font-size: 1.2rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #1b4332;
-}
-
-.brand-sub {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6b7280;
-  text-transform: uppercase;
-}
-
-/* Píldora central de navegación (Lehmann) */
-.nav-pill-bar {
-  background: #ffffff;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-}
-
-.nav-pill-link {
-  color: #1f2937;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 0.45rem 1rem;
-  border-radius: 999px;
-  transition: all 0.2s ease;
-}
-
-.nav-pill-link:hover {
-  color: #15803d;
-  background: #f0fdf4;
-}
-
-.nav-pill-link.active {
-  background: #15803d;
   color: #ffffff;
 }
 
-/* Píldoras derechas: Clima + Cuenta Corriente + Carrito */
-.header-pills-right {
+.brand .brand-icon {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  justify-content: center;
+  background: #eab308;
+  color: #107c41;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
 }
 
-.info-pill {
-  background: #ffffff;
-  color: #1f2937;
-  padding: 0.35rem 0.9rem;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  text-decoration: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  border: 2px solid transparent;
-  transition: transform 0.15s ease, border-color 0.2s ease;
-}
-
-.info-pill:hover,
-.info-pill.active-pill {
-  transform: translateY(-1px);
-  border-color: #eab308;
-}
-
-.weather-icon {
-  color: #0284c7;
-  font-size: 24px;
-}
-
-.cc-icon {
-  color: #15803d;
+.brand .brand-icon .material-symbols-outlined {
   font-size: 22px;
+  font-weight: bold;
 }
 
-.pill-text-group {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-}
-
-.pill-top {
-  font-size: 0.72rem;
-  color: #4b5563;
-  font-weight: 600;
-}
-
-.pill-bottom {
-  font-size: 0.82rem;
-  color: #111827;
-}
-
-.pill-bottom small {
-  color: #6b7280;
-  font-size: 0.7rem;
-}
-
-.pill-brand {
-  font-size: 0.85rem;
+.brand .brand-text {
+  font-size: 1.45rem;
   font-weight: 800;
-  font-style: italic;
-  color: #111827;
+  letter-spacing: -0.5px;
 }
 
-.pill-sub {
-  font-size: 0.7rem;
-  color: #4b5563;
-  font-weight: 600;
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-/* Botón rojo LG para Cotizar */
-.cotizar-pill-btn {
-  background: #c91424;
+.nav-links .nav-item {
   color: #ffffff;
-  padding: 0.55rem 1.1rem;
-  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.nav-links .nav-item:hover,
+.nav-links .nav-item.active {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.actions .icon-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actions .icon-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.actions .icon-btn.text-size-btn {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.actions .icon-btn .material-symbols-outlined {
+  font-size: 19px;
+}
+
+/* Red Quote Button */
+.actions .cotizar-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  background-color: var(--agro-red, #c91424);
+  color: white;
+  padding: 0.45rem 1rem;
+  border-radius: 20px;
+  font-size: 0.92rem;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(201, 20, 36, 0.35);
-  transition: background 0.2s ease, transform 0.15s ease;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s, transform 0.1s;
 }
 
-.cotizar-pill-btn:hover {
-  background: #a30f1d;
+.actions .cotizar-btn:hover {
+  background-color: var(--agro-red-hover, #a10f1c);
   transform: translateY(-1px);
 }
 
-.cart-badge {
-  background: #facc15;
+.actions .cotizar-btn .cart-icon {
+  font-size: 19px;
+}
+
+.actions .cotizar-btn .cart-badge {
+  background-color: #facc15;
   color: #713f12;
   font-size: 0.75rem;
   font-weight: 800;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@media (max-width: 960px) {
-  .header-container {
-    justify-content: center;
+.brand-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+  .btn-text {
+    display: none;
+  }
+  .actions .cotizar-btn {
+    padding: 0.45rem 0.65rem;
   }
 }
