@@ -1,1 +1,192 @@
-<p>semilla-list works!</p>
+<main class="agro-catalog-page">
+
+  <!-- 1. BANNER CAMPAÑA + BENEFICIOS (Inspirado en LG Campaña 2025 + Lehmann) -->
+  <section class="campaign-banner">
+    <div class="banner-left">
+      <span class="campaign-pill">CAMPAÑA 2025 / 2026 · SEMILLERO OFICIAL</span>
+      <h1>Catálogo Técnico de Semillas &amp; Genética Aplicada</h1>
+      <p>
+        Seleccioná el cultivo para explorar la ficha agronómica completa, la empresa elaboradora,
+        el comportamiento sanitario y las regiones donde mejor se adapta cada semilla.
+      </p>
+      <div class="benefits-row">
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined">verified</span>
+          <span><strong>Seguro de Resiembra 100%</strong> ante granizo o planchado</span>
+        </div>
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined">ac_unit</span>
+          <span><strong>Guarda en Cámara Fría</strong> sin costo adicional</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner-right">
+      <button class="btn-refresh-catalog" (click)="cargarSemillas()" [disabled]="loading()">
+        <span class="material-symbols-outlined">refresh</span>
+        Actualizar desde Base de Datos ({{ dataSource().length }})
+      </button>
+    </div>
+  </section>
+
+  <!-- 2. TARJETAS DE ACCESO POR CULTIVO (Estilo Guillermo Lehmann) -->
+  <section class="lehmann-categories">
+    <button
+      *ngFor="let cat of categoriasLehmann"
+      class="lehmann-cat-card"
+      [class.selected]="cultivoFiltro() === cat.codigo"
+      (click)="seleccionarCultivo(cat.codigo)">
+      <div class="cat-header">
+        <div class="cat-icon-box" [style.background]="cat.color">
+          <span class="material-symbols-outlined">{{ cat.icono }}</span>
+        </div>
+        <span class="cat-title">{{ cat.titulo }}</span>
+      </div>
+      <p class="cat-desc">{{ cat.sub }}</p>
+    </button>
+  </section>
+
+  <!-- 3. ESTADOS DE CARGA / ERROR / VACÍO -->
+  <div *ngIf="loading()" class="state-panel">
+    <mat-spinner diameter="44"></mat-spinner>
+    <span>Cargando fichas técnicas de semillas desde AgroEco_API…</span>
+  </div>
+
+  <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel">
+    <mat-icon class="icon-error">error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+    <button mat-flat-button color="primary" (click)="cargarSemillas()">Reintentar conexión</button>
+  </div>
+
+  <div *ngIf="!loading() && !errorMessage() && semillasFiltradas().length === 0" class="state-panel">
+    <mat-icon>inventory_2</mat-icon>
+    <span>No hay semillas registradas para el filtro seleccionado.</span>
+    <button mat-stroked-button (click)="seleccionarCultivo('TODOS')">Ver todos los cultivos</button>
+  </div>
+
+  <!-- 4. GRILLA DE FICHAS TÉCNICAS EN TARJETAS ORDENADAS (Información de LG pero sin marear) -->
+  <section *ngIf="!loading() && !errorMessage() && semillasFiltradas().length > 0" class="seeds-cards-grid">
+
+    <article class="seed-product-card" *ngFor="let semilla of semillasFiltradas()">
+
+      <!-- A. Cabecera del Producto + Empresa Elaboradora + Tecnología -->
+      <header class="seed-card-top">
+        <div class="seed-title-block">
+          <div class="seed-badges-line">
+            <span class="crop-tag">{{ semilla.cultivoNombre }}</span>
+            <span class="tech-tag">{{ semilla.tecnologiaBadge }}</span>
+            <span class="cycle-tag" [ngClass]="(semilla.ciclo || 'medio').toLowerCase()">
+              Ciclo {{ semilla.ciclo }}
+            </span>
+            <span class="status-pill" [class.active]="semilla.activo">
+              ● {{ semilla.activo ? 'Disponible' : 'Sin stock' }}
+            </span>
+          </div>
+
+          <h2 class="seed-variety-name">
+            {{ semilla.nombre }}
+            <small class="seed-db-id">Código #{{ semilla.id }}</small>
+          </h2>
+
+          <!-- Empresa que elaboró el producto -->
+          <div class="elaborador-box">
+            <span class="material-symbols-outlined">domain_verification</span>
+            <div>
+              <strong>Elaborado por:</strong> {{ semilla.empresaElaboradora }}
+              <span class="elaborador-sub">{{ semilla.origenLicencia }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="seed-top-actions">
+          <button class="btn-add-quote" (click)="agregarACotizacion(semilla)">
+            <span class="material-symbols-outlined">add_shopping_cart</span>
+            Sumar a Cotización
+          </button>
+          <button class="btn-delete-seed" matTooltip="Eliminar de la base de datos" (click)="eliminarSemilla(semilla)">
+            <span class="material-symbols-outlined">delete</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Resumen descriptivo de tu base de datos -->
+      <p class="seed-summary-text">
+        {{ semilla.caracteristicas || semilla.descripcion || 'Semilla de alto potencial productivo y estabilidad comprobada.' }}
+      </p>
+
+      <!-- B. Las 3 sub-tarjetas internas ordenadas (Características + Sanidad + Dónde se adapta) -->
+      <div class="seed-inner-cards">
+
+        <!-- Sub-tarjeta 1: Características Agronómicas (ordenada en grilla limpia, sin barras que mareen) -->
+        <div class="inner-box agro-box">
+          <h3>
+            <span class="material-symbols-outlined">analytics</span>
+            Características Agronómicas
+          </h3>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Cruzamiento</span>
+              <strong class="spec-val">{{ semilla.cruzamientoFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Madurez / Ciclo</span>
+              <strong class="spec-val">{{ semilla.madurezFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Días a floración</span>
+              <strong class="spec-val">{{ semilla.diasFloracionFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Altura / Hileras</span>
+              <strong class="spec-val">{{ semilla.alturaPlantaFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Tipo y color de grano</span>
+              <strong class="spec-val">{{ semilla.colorGranoFicha }}</strong>
+            </div>
+            <div class="spec-item highlight">
+              <span class="spec-label">Rinde potencial</span>
+              <strong class="spec-val">{{ semilla.rendimientoFicha }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tarjeta 2: Comportamiento Sanitario (con estrellas como LG) -->
+        <div class="inner-box health-box">
+          <h3>
+            <span class="material-symbols-outlined">shield_with_heart</span>
+            Comportamiento Sanitario
+          </h3>
+          <ul class="sanidad-list">
+            <li *ngFor="let item of semilla.sanidad">
+              <span class="sanidad-name">{{ item.nombre }}</span>
+              <span class="stars-row" [title]="item.puntos + ' de 5'">
+                <span
+                  *ngFor="let llena of estrellasArray(item.puntos)"
+                  class="star"
+                  [class.filled]="llena">★</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Sub-tarjeta 3: Dónde se adapta la semilla (Zonas de mayor adaptación) -->
+        <div class="inner-box zones-box">
+          <h3>
+            <span class="material-symbols-outlined">location_on</span>
+            Dónde se adapta la semilla
+          </h3>
+          <p class="zones-helper">Regiones agroecológicas recomendadas para expresar su máximo rinde:</p>
+          <div class="zones-chips">
+            <span class="zone-chip" *ngFor="let z of semilla.zonasFicha">
+              <span class="material-symbols-outlined">check_circle</span>
+              {{ z }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+</main>
