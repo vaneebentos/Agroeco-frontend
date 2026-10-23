@@ -1,5 +1,5 @@
 
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -46,6 +46,29 @@ export class ClienteListComponent implements OnInit {
     this.cargarClientes();
   }
 
+  abrirFormulario(): void {
+    this.error = '';
+    this.mensaje = '';
+    this.mostrarFormulario = true;
+  }
+
+  cerrarFormulario(): void {
+    this.mostrarFormulario = false;
+    this.error = '';
+    this.nuevoCliente = {
+      nombre: '',
+      email: '',
+      telefono: ''
+    };
+  }
+
+  @HostListener('document:keydown.escape')
+  cerrarFormularioConEscape(): void {
+    if (this.mostrarFormulario) {
+      this.cerrarFormulario();
+    }
+  }
+
   get clientesFiltrados(): Cliente[] {
   const termino = this.busqueda.trim().toLowerCase();
 
@@ -87,13 +110,7 @@ export class ClienteListComponent implements OnInit {
       next: (respuesta) => {
         this.mensaje = respuesta.message;
 
-        this.nuevoCliente = {
-          nombre: '',
-          email: '',
-          telefono: ''
-        };
-
-        this.mostrarFormulario = false;
+        this.cerrarFormulario();
         this.cargarClientes();
       },
       error: (err) => {

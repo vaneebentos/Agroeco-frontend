@@ -26,92 +26,132 @@
 
 <button
   type="button"
-  (click)="mostrarFormulario = !mostrarFormulario; mensaje = ''; error = ''"
+  (click)="abrirFormulario()"
 >
-  {{ mostrarFormulario ? 'Cancelar' : 'Nuevo cliente' }}
+  Nuevo cliente
 </button>
 
-<!-- Formulario para crear un cliente -->
-<form
+<div
   *ngIf="mostrarFormulario"
-  #formCliente="ngForm"
-  (ngSubmit)="crearCliente()"
-  novalidate
+  class="modal-fondo"
+  role="presentation"
+  (click)="cerrarFormulario()"
 >
-  <h3>Nuevo cliente</h3>
+  <section
+    class="modal-contenido"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloNuevoCliente"
+    aria-describedby="descripcionNuevoCliente"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="modal-encabezado">
+      <div class="modal-icono" aria-hidden="true">+</div>
+      <div>
+        <h3 id="tituloNuevoCliente">Nuevo cliente</h3>
+        <p id="descripcionNuevoCliente">Completá los datos para registrar un cliente.</p>
+      </div>
+      <button
+        type="button"
+        class="modal-cerrar"
+        aria-label="Cerrar formulario"
+        (click)="cerrarFormulario()"
+      >
+        ×
+      </button>
+    </header>
 
-  <div>
-    <label for="nombre">Nombre</label>
-    <input
-      id="nombre"
-      name="nombre"
-      type="text"
-      [(ngModel)]="nuevoCliente.nombre"
-      #nombre="ngModel"
-      required
-      minlength="2"
-      maxlength="255"
-      [class.input-error]="nombre.invalid && nombre.touched"
+    <div *ngIf="error" class="modal-error" role="alert">
+      {{ error }}
+    </div>
+
+    <form
+      class="modal-formulario"
+      #formCliente="ngForm"
+      (ngSubmit)="crearCliente()"
+      novalidate
     >
+      <div>
+        <label for="nombre">Nombre</label>
+        <input
+          id="nombre"
+          name="nombre"
+          type="text"
+          [(ngModel)]="nuevoCliente.nombre"
+          #nombre="ngModel"
+          required
+          minlength="2"
+          maxlength="255"
+          placeholder="Nombre y apellido"
+          [class.input-error]="nombre.invalid && nombre.touched"
+        >
 
-    <small class="error-campo"
-      *ngIf="nombre.touched && nombre.errors?.['required']">
-      El nombre es obligatorio.
-    </small>
+        <small class="error-campo"
+          *ngIf="nombre.touched && nombre.errors?.['required']">
+          El nombre es obligatorio.
+        </small>
 
-    <small class="error-campo"
-      *ngIf="nombre.touched && nombre.errors?.['minlength']">
-      El nombre debe tener al menos 2 caracteres.
-    </small>
-  </div>
+        <small class="error-campo"
+          *ngIf="nombre.touched && nombre.errors?.['minlength']">
+          El nombre debe tener al menos 2 caracteres.
+        </small>
+      </div>
 
-  <div>
-    <label for="email">Email</label>
-    <input
-      id="email"
-      name="email"
-      type="email"
-      [(ngModel)]="nuevoCliente.email"
-      #email="ngModel"
-      required
-      email
-      [class.input-error]="email.invalid && email.touched"
-    >
+      <div>
+        <label for="email">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          [(ngModel)]="nuevoCliente.email"
+          #email="ngModel"
+          required
+          email
+          placeholder="cliente@ejemplo.com"
+          [class.input-error]="email.invalid && email.touched"
+        >
 
-    <small class="error-campo"
-      *ngIf="email.touched && email.errors?.['required']">
-      El email es obligatorio.
-    </small>
+        <small class="error-campo"
+          *ngIf="email.touched && email.errors?.['required']">
+          El email es obligatorio.
+        </small>
 
-    <small class="error-campo"
-      *ngIf="email.touched && email.errors?.['email']">
-      Ingresá un email válido.
-    </small>
-  </div>
+        <small class="error-campo"
+          *ngIf="email.touched && email.errors?.['email']">
+          Ingresá un email válido.
+        </small>
+      </div>
 
-  <div>
-    <label for="telefono">Teléfono</label>
-    <input
-      id="telefono"
-      name="telefono"
-      type="text"
-      [(ngModel)]="nuevoCliente.telefono"
-      #telefono="ngModel"
-      required
-      [class.input-error]="telefono.invalid && telefono.touched"
-    >
+      <div>
+        <label for="telefono">Teléfono</label>
+        <input
+          id="telefono"
+          name="telefono"
+          type="text"
+          [(ngModel)]="nuevoCliente.telefono"
+          #telefono="ngModel"
+          required
+          placeholder="Ej. 11 1234-5678"
+          [class.input-error]="telefono.invalid && telefono.touched"
+        >
 
-    <small class="error-campo"
-      *ngIf="telefono.touched && telefono.errors?.['required']">
-      El teléfono es obligatorio.
-    </small>
-  </div>
+        <small class="error-campo"
+          *ngIf="telefono.touched && telefono.errors?.['required']">
+          El teléfono es obligatorio.
+        </small>
+      </div>
 
-  <button type="submit" [disabled]="formCliente.invalid">
-    Guardar cliente
-  </button>
-</form>
-
+      <footer class="modal-acciones">
+        <button type="button" class="boton-secundario" (click)="cerrarFormulario()">
+          Cancelar
+        </button>
+        <button type="submit" [disabled]="formCliente.invalid">
+          Guardar cliente
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>
 
 <!-- Mensaje de estado -->
 <div *ngIf="mensaje" class="alerta"
