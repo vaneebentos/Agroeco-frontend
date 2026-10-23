@@ -71,7 +71,10 @@
           <div class="empty-cart-card">
             <span class="material-symbols-outlined empty-cart-icon">remove_shopping_cart</span>
             <p>No tenés productos cargados en tu solicitud de cotización.</p>
-            <a routerLink="/semillas" class="btn btn-outline">Ir a semillas</a>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary" (click)="agregarSemillaEjemplo()">+ Cargar producto de prueba (Maíz LG 30646)</button>
+              <a routerLink="/semillas" class="btn btn-outline">Ir al catálogo</a>
+            </div>
           </div>
         </ng-template>
       </div>
