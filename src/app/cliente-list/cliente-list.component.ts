@@ -110,6 +110,11 @@ crearCliente(): void {
 
   this.clienteService.crearCliente(this.nuevoCliente).subscribe({
     next: (respuesta) => {
+      if (!respuesta.creado) {
+        this.error = respuesta.message;
+        return;
+      }
+
       this.mensaje = respuesta.message;
 
       this.cerrarFormulario();
