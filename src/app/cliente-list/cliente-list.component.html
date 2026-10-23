@@ -1,1 +1,264 @@
-<p>cliente-list works!</p>
+
+<h2>Clientes</h2>
+
+<div>
+  <label for="busqueda">Buscar cliente</label>
+
+  <input
+    id="busqueda"
+    name="busqueda"
+    type="text"
+    [(ngModel)]="busqueda"
+    placeholder="Buscar por ID, nombre o email..."
+  >
+
+  <button
+    type="button"
+    (click)="busqueda = ''"
+  >
+    Limpiar
+  </button>
+</div>
+
+<button type="button" (click)="cargarClientes()">
+  Actualizar lista
+</button>
+
+<button
+  type="button"
+  (click)="mostrarFormulario = !mostrarFormulario; mensaje = ''; error = ''"
+>
+  {{ mostrarFormulario ? 'Cancelar' : 'Nuevo cliente' }}
+</button>
+
+<!-- Formulario para crear un cliente -->
+<form
+  *ngIf="mostrarFormulario"
+  #formCliente="ngForm"
+  (ngSubmit)="crearCliente()"
+  novalidate
+>
+  <h3>Nuevo cliente</h3>
+
+  <div>
+    <label for="nombre">Nombre</label>
+    <input
+      id="nombre"
+      name="nombre"
+      type="text"
+      [(ngModel)]="nuevoCliente.nombre"
+      #nombre="ngModel"
+      required
+      minlength="2"
+      maxlength="255"
+      [class.input-error]="nombre.invalid && nombre.touched"
+    >
+
+    <small class="error-campo"
+      *ngIf="nombre.touched && nombre.errors?.['required']">
+      El nombre es obligatorio.
+    </small>
+
+    <small class="error-campo"
+      *ngIf="nombre.touched && nombre.errors?.['minlength']">
+      El nombre debe tener al menos 2 caracteres.
+    </small>
+  </div>
+
+  <div>
+    <label for="email">Email</label>
+    <input
+      id="email"
+      name="email"
+      type="email"
+      [(ngModel)]="nuevoCliente.email"
+      #email="ngModel"
+      required
+      email
+      [class.input-error]="email.invalid && email.touched"
+    >
+
+    <small class="error-campo"
+      *ngIf="email.touched && email.errors?.['required']">
+      El email es obligatorio.
+    </small>
+
+    <small class="error-campo"
+      *ngIf="email.touched && email.errors?.['email']">
+      Ingresá un email válido.
+    </small>
+  </div>
+
+  <div>
+    <label for="telefono">Teléfono</label>
+    <input
+      id="telefono"
+      name="telefono"
+      type="text"
+      [(ngModel)]="nuevoCliente.telefono"
+      #telefono="ngModel"
+      required
+      [class.input-error]="telefono.invalid && telefono.touched"
+    >
+
+    <small class="error-campo"
+      *ngIf="telefono.touched && telefono.errors?.['required']">
+      El teléfono es obligatorio.
+    </small>
+  </div>
+
+  <button type="submit" [disabled]="formCliente.invalid">
+    Guardar cliente
+  </button>
+</form>
+
+
+<!-- Mensaje de estado -->
+<div *ngIf="mensaje" class="alerta"
+     [ngClass]="mensaje.toLowerCase().includes('registrado') ? 'alerta-error' : 'alerta-exito'"
+     [attr.role]="mensaje.toLowerCase().includes('registrado') ? 'alert' : 'status'">
+
+  <span class="alerta-icono">
+    {{ mensaje.toLowerCase().includes('registrado') ? '!' : '✓' }}
+  </span>
+
+  <div>
+    <strong>
+      {{ mensaje.toLowerCase().includes('registrado')
+          ? 'Email ya registrado'
+          : 'Operación exitosa' }}
+    </strong>
+    <p>{{ mensaje }}</p>
+  </div>
+
+  <button
+    type="button"
+    class="alerta-cerrar"
+    (click)="mensaje = ''"
+    aria-label="Cerrar aviso">
+    ×
+  </button>
+</div>
+
+<!-- Aviso de error -->
+<div *ngIf="error" class="alerta alerta-error" role="alert">
+  <span class="alerta-icono">!</span>
+  <div>
+    <strong>No se pudo completar la operación</strong>
+    <p>{{ error }}</p>
+  </div>
+  <button
+    type="button"
+    class="alerta-cerrar"
+    (click)="error = ''"
+    aria-label="Cerrar aviso">
+    ×
+  </button>
+</div>
+
+<p *ngIf="cargando">Cargando clientes...</p>
+
+<!-- Tabla de clientes -->
+<table *ngIf="!cargando && clientesFiltrados.length > 0">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Email</th>
+      <th>Teléfono</th>
+      <th>Fecha de creación</th>
+      <th>Última actualización</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let cliente of clientesFiltrados">
+      <td>{{ cliente.id }}</td>
+      <td>{{ cliente.nombre }}</td>
+      <td>{{ cliente.email }}</td>
+      <td>{{ cliente.telefono || 'Sin teléfono' }}</td>
+
+      <td>
+        {{ cliente.fecha_creacion
+          ? (cliente.fecha_creacion | date:'dd/MM/yyyy HH:mm')
+          : 'Sin fecha' }}
+      </td>
+
+      <td>
+        {{ cliente.fecha_actualizacion
+          ? (cliente.fecha_actualizacion | date:'dd/MM/yyyy HH:mm')
+          : 'Sin fecha' }}
+      </td>
+
+      <td>
+        <button
+          type="button"
+          (click)="editarCliente(cliente)"
+        >
+          Editar
+        </button>
+
+        <button
+          type="button"
+          (click)="eliminarCliente(cliente)"
+        >
+          Eliminar
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<p *ngIf="!cargando && clientes.length > 0 && clientesFiltrados.length === 0">
+  No se encontraron clientes con esa búsqueda.
+</p>
+
+<!-- Formulario para editar un cliente -->
+<form
+  *ngIf="clienteEditandoId !== null"
+  (ngSubmit)="guardarEdicion()"
+>
+  <h3>Editar cliente</h3>
+
+  <div>
+    <label for="editNombre">Nombre</label>
+    <input
+      id="editNombre"
+      name="editNombre"
+      type="text"
+      [(ngModel)]="clienteEditando.nombre"
+      required
+    >
+  </div>
+
+  <div>
+    <label for="editEmail">Email</label>
+    <input
+      id="editEmail"
+      name="editEmail"
+      type="email"
+      [(ngModel)]="clienteEditando.email"
+      required
+    >
+  </div>
+
+  <div>
+    <label for="editTelefono">Teléfono</label>
+    <input
+      id="editTelefono"
+      name="editTelefono"
+      type="text"
+      [(ngModel)]="clienteEditando.telefono"
+    >
+  </div>
+
+  <button type="submit">Guardar cambios</button>
+
+  <button
+    type="button"
+    (click)="cancelarEdicion()"
+  >
+    Cancelar
+  </button>
+</form>
