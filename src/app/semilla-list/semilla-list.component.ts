@@ -26,6 +26,8 @@ export interface FichaSemillaExtendida extends Semilla {
   zonasFicha: string[];
 }
 
+const TEMPORADAS_DISPONIBLES_DEFAULT = ['2025/26 Temprana', '2025/26 Tardía'];
+
 @Component({
   selector: 'app-semilla-list',
   standalone: true,
@@ -67,6 +69,7 @@ export class SemillaListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.normalizarTemporadasEnCarrito();
     this.cargarSemillas();
   }
 
@@ -88,7 +91,9 @@ export class SemillaListComponent implements OnInit {
       )
       .subscribe({
         next: (semillas) => {
-          this.dataSource.set(semillas.map(s => this.enriquecerFicha(s)));
+          const enriquecidas = semillas.map(s => this.enriquecerFicha(s));
+          this.dataSource.set(enriquecidas);
+          this.normalizarTemporadasEnCarrito();
         },
         error: (err) => {
           console.error('Error al cargar semillas:', err);
@@ -100,7 +105,31 @@ export class SemillaListComponent implements OnInit {
   }
 
   agregarACotizacion(semilla: FichaSemillaExtendida): void {
-    this.cotizacionService.addItem(semilla);
+    const semillaConTemporadas: FichaSemillaExtendida = {
+      ...semilla,
+      cultivo: semilla.cultivo || semilla.cultivoNombre,
+      temporadasDisponibles:
+        semilla.temporadasDisponibles && semilla.temporadasDisponibles.length >= 2
+          ? semilla.temporadasDisponibles
+          : TEMPORADAS_DISPONIBLES_DEFAULT
+    };
+
+    const existente = this.cotizacionService
+      .items()
+      .find(i => i.semillaId === Number(semillaConTemporadas.id));
+
+    if (
+      existente &&
+      (!existente.semilla.temporadasDisponibles || existente.semilla.temporadasDisponibles.length < 2)
+    ) {
+      const hectareasPrevias = Number(existente.hectareas) || 0;
+      const temporadaPrevia = existente.temporada || TEMPORADAS_DISPONIBLES_DEFAULT[0];
+      this.cotizacionService.removeItem(Number(semillaConTemporadas.id));
+      this.cotizacionService.addItem(semillaConTemporadas, hectareasPrevias + 50, temporadaPrevia);
+      return;
+    }
+
+    this.cotizacionService.addItem(semillaConTemporadas);
   }
 
   eliminarSemilla(semilla: FichaSemillaExtendida): void {
@@ -122,6 +151,26 @@ export class SemillaListComponent implements OnInit {
     return [1, 2, 3, 4, 5].map(i => i <= puntos);
   }
 
+  /**
+   * Asegura que cualquier semilla que ya estuviera guardada en localStorage
+   * tenga cargadas las opciones de temporada para el desplegable de Cotización.
+   */
+  private normalizarTemporadasEnCarrito(): void {
+    const itemsActuales = this.cotizacionService.items();
+    for (const item of itemsActuales) {
+      if (!item.semilla.temporadasDisponibles || item.semilla.temporadasDisponibles.length < 2) {
+        const semillaNormalizada: Semilla = {
+          ...item.semilla,
+          temporadasDisponibles: TEMPORADAS_DISPONIBLES_DEFAULT
+        };
+        const ha = Number(item.hectareas) || 50;
+        const temp = item.temporada || TEMPORADAS_DISPONIBLES_DEFAULT[0];
+        this.cotizacionService.removeItem(item.semillaId);
+        this.cotizacionService.addItem(semillaNormalizada, ha, temp);
+      }
+    }
+  }
+
   private enriquecerFicha(s: Semilla): FichaSemillaExtendida {
     const nombreUpper = (s.nombre || '').toUpperCase();
     const mapaCultivo: Record<number, string> = {
@@ -137,10 +186,19 @@ export class SemillaListComponent implements OnInit {
     if (nombreUpper.includes('MAÍZ') || nombreUpper.includes('MAIZ') || nombreUpper.includes('LG 30') || nombreUpper.includes('DK')) cultivoNombre = 'Maíz';
     if (nombreUpper.includes('SOJA') || nombreUpper.includes('DM')) cultivoNombre = 'Soja';
 
+    const temporadasDisponibles =
+      s.temporadasDisponibles && s.temporadasDisponibles.length >= 2
+        ? s.temporadasDisponibles
+        : TEMPORADAS_DISPONIBLES_DEFAULT;
+
     if (cultivoNombre === 'Girasol') {
+      const zonas = ['Centro-Norte Santa Fe', 'Córdoba', 'Entre Ríos', 'Oeste de Buenos Aires', 'La Pampa'];
       return {
         ...s,
+        cultivo: cultivoNombre,
         cultivoNombre,
+        temporadasDisponibles,
+        zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'Limagrain (LG Semillas) · Tecnología Clearfield® (BASF)',
         origenLicencia: 'Semillero Oficial Fiscalizado — Guarda en Cámara Fría Incluida',
         tecnologiaBadge: 'Clearfield CL',
@@ -156,14 +214,18 @@ export class SemillaListComponent implements OnInit {
           { nombre: 'Tolerancia a vuelco / quebrado', puntos: 4 },
           { nombre: 'Tolerancia a Sclerotinia', puntos: 4 }
         ],
-        zonasFicha: ['Centro-Norte Santa Fe', 'Córdoba', 'Entre Ríos', 'Oeste de Buenos Aires', 'La Pampa']
+        zonasFicha: zonas
       };
     }
 
     if (cultivoNombre === 'Trigo') {
+      const zonas = ['Sur y Centro de Santa Fe', 'Sudeste y Oeste de Bs. As.', 'Entre Ríos', 'Sudeste de Córdoba'];
       return {
         ...s,
+        cultivo: cultivoNombre,
         cultivoNombre,
+        temporadasDisponibles,
+        zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'Limagrain / Buck Semillas — Red Líder AgroEco',
         origenLicencia: 'Variedad Fiscalizada con Seguro de Resiembra',
         tecnologiaBadge: s.ciclo === 'Largo' ? 'Grupo Calidad 1 · Heladas' : 'Alto Potencial Sanitario',
@@ -179,14 +241,18 @@ export class SemillaListComponent implements OnInit {
           { nombre: 'Tolerancia a Fusariosis de la espiga', puntos: 4 },
           { nombre: 'Tolerancia a Mancha Amarilla', puntos: 4 }
         ],
-        zonasFicha: ['Sur y Centro de Santa Fe', 'Sudeste y Oeste de Bs. As.', 'Entre Ríos', 'Sudeste de Córdoba']
+        zonasFicha: zonas
       };
     }
 
     if (cultivoNombre === 'Soja') {
+      const zonas = ['Zona Núcleo', 'Centro-Sur de Santa Fe', 'Norte de Buenos Aires', 'Marcos Juárez (Córdoba)'];
       return {
         ...s,
+        cultivo: cultivoNombre,
         cultivoNombre,
+        temporadasDisponibles,
+        zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'DonMario (GDM) / Nidera Semillas',
         origenLicencia: 'Multiplicador Oficial AgroEco',
         tecnologiaBadge: 'Enlist E3 / STS',
@@ -202,15 +268,19 @@ export class SemillaListComponent implements OnInit {
           { nombre: 'Tolerancia a Cancro del Tallo', puntos: 5 },
           { nombre: 'Comportamiento frente a vuelco', puntos: 4 }
         ],
-        zonasFicha: ['Zona Núcleo', 'Centro-Sur de Santa Fe', 'Norte de Buenos Aires', 'Marcos Juárez (Córdoba)']
+        zonasFicha: zonas
       };
     }
 
     // Por defecto: Maíz (estilo LG 30849 / DK 72-10)
     const esDekalb = nombreUpper.includes('DK');
+    const zonas = ['Zona Núcleo', 'Centro y Sur de Santa Fe', 'Córdoba', 'Entre Ríos', 'Buenos Aires', 'La Pampa'];
     return {
       ...s,
+      cultivo: 'Maíz',
       cultivoNombre: 'Maíz',
+      temporadasDisponibles,
+      zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
       empresaElaboradora: esDekalb
         ? 'Dekalb (Bayer CropScience) · Distribuidor Oficial AgroEco'
         : 'Limagrain (LG Semillas · 60 años) · Semillero Oficial',
@@ -228,7 +298,7 @@ export class SemillaListComponent implements OnInit {
         { nombre: 'Tolerancia a Mal de Río IV', puntos: 3 },
         { nombre: 'Tolerancia a Tizón foliar', puntos: 4 }
       ],
-      zonasFicha: ['Zona Núcleo', 'Centro y Sur de Santa Fe', 'Córdoba', 'Entre Ríos', 'Buenos Aires', 'La Pampa']
+      zonasFicha: zonas
     };
   }
 }

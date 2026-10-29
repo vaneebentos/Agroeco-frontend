@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { CartItem, CotizacionPayload, ProducerFormData } from '../../shared/models/cotizacion.model';
 import { Semilla } from '../../shared/models/semilla.model';
 
+const TEMPORADAS_DEFAULT = ['2025/26 Temprana', '2025/26 Tardía'];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,22 +28,33 @@ export class CotizacionService {
   constructor(private http: HttpClient) {}
 
   addItem(semilla: Semilla, hectareas: number = 50, temporada?: string) {
+    const temporadas =
+      semilla.temporadasDisponibles && semilla.temporadasDisponibles.length >= 2
+        ? semilla.temporadasDisponibles
+        : TEMPORADAS_DEFAULT;
+
+    const semillaConTemporadas: Semilla = {
+      ...semilla,
+      temporadasDisponibles: temporadas
+    };
+
     const current = this.cartItems();
-    const existingIndex = current.findIndex(i => i.semillaId === Number(semilla.id));
-    const selectedTemporada = temporada || semilla.temporadasDisponibles?.[0] || '2025/26 Temprana';
+    const existingIndex = current.findIndex(i => i.semillaId === Number(semillaConTemporadas.id));
+    const selectedTemporada = temporada || temporadas[0] || '2025/26 Temprana';
 
     if (existingIndex > -1) {
       const updated = [...current];
       updated[existingIndex] = {
         ...updated[existingIndex],
+        semilla: semillaConTemporadas,
         hectareas: updated[existingIndex].hectareas + hectareas,
         temporada: selectedTemporada
       };
       this.saveCart(updated);
     } else {
       const newItem: CartItem = {
-        semillaId: Number(semilla.id),
-        semilla: semilla,
+        semillaId: Number(semillaConTemporadas.id),
+        semilla: semillaConTemporadas,
         hectareas: hectareas,
         temporada: selectedTemporada
       };
@@ -103,7 +116,17 @@ export class CotizacionService {
     try {
       const data = localStorage.getItem(this.storageKey);
       if (data) {
-        return JSON.parse(data);
+        const parsed: CartItem[] = JSON.parse(data);
+        return parsed.map(item => ({
+          ...item,
+          semilla: {
+            ...item.semilla,
+            temporadasDisponibles:
+              item.semilla?.temporadasDisponibles && item.semilla.temporadasDisponibles.length >= 2
+                ? item.semilla.temporadasDisponibles
+                : TEMPORADAS_DEFAULT
+          }
+        }));
       }
     } catch (e) {
       console.warn('Error leyendo carrito de localStorage', e);
@@ -125,7 +148,7 @@ export class CotizacionService {
           tecnologia: 'VIP3',
           ambiente: 'Alto potencial, Intermedio',
           zonasAdaptacion: ['Núcleo'],
-          temporadasDisponibles: ['2025/26 Temprana']
+          temporadasDisponibles: TEMPORADAS_DEFAULT
         },
         hectareas: 50,
         temporada: '2025/26 Temprana'
