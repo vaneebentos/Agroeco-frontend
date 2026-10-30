@@ -1,0 +1,50 @@
+<form [formGroup]="formulario" (ngSubmit)="guardarCliente()">
+
+    <!-- Nombre -->
+    <div>
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" formControlName="nombre" placeholder="Ingrese el nombre" />
+
+        @if (obtenerError('nombre'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    <!-- Email -->
+    <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="Ingrese el email" />
+
+        @if (obtenerError('email'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    <!-- Teléfono -->
+    <div>
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" type="text" formControlName="telefono" placeholder="Ingrese el teléfono" />
+
+        @if (obtenerError('telefono'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    @if (errorServidor) {
+    <div class="error-servidor">
+        {{ errorServidor }}
+    </div>
+    }
+
+    <!-- Botones -->
+    <div>
+        <button type="submit" [disabled]="formulario.invalid">
+            {{ cliente ? 'Guardar cambios' : 'Crear cliente' }}
+        </button>
+
+        <button type="button" (click)="cancelarFormulario()">
+            Cancelar
+        </button>
+    </div>
+
+</form>

@@ -1,0 +1,10 @@
+@if (mensajeExito) {
+  <p>{{ mensajeExito }}</p>
+}
+
+<app-cliente-form
+  [cliente]="clienteSeleccionado"
+  [errorServidor]="errorServidor"
+  (guardar)="guardarCliente($event)"
+  (cancelar)="cancelarFormulario()"
+/>
