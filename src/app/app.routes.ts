@@ -5,6 +5,7 @@ import { ClienteFormComponent } from './features/cliente/components/cliente-form
 import { ClienteListComponent } from './features/cliente/components/cliente-list/cliente-list.component';
 
 export const routes: Routes = [
+  { path: '', redirectTo: '/semillas', pathMatch: 'full' },
   { path: 'semillas', component: SemillaListComponent },
   { path: 'cotizacion', component: CotizacionComponent },
   { path: 'clientes/form', component: ClienteFormComponent },
