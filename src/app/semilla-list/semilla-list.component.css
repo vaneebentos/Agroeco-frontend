@@ -10,6 +10,60 @@
   padding: 1.5rem 1.25rem 3.5rem;
 }
 
+/* SISTEMA DE ALERTAS (Cartel de Semilla Creada, Editada, Eliminada) */
+.agro-alert-banner {
+  position: sticky;
+  top: 1rem;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.35rem;
+  border-radius: 14px;
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+}
+
+.agro-alert-banner.alert-exito {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  color: #14532d;
+}
+
+.agro-alert-banner.alert-edicion {
+  background: #e0f2fe;
+  border: 1px solid #7dd3fc;
+  color: #0c4a6e;
+}
+
+.agro-alert-banner.alert-eliminada {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  color: #7f1d1d;
+}
+
+.alert-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.alert-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.75;
+}
+
+.alert-close-btn:hover {
+  opacity: 1;
+}
+
 /* 1. BANNER CAMPAÑA (Estilo LG + Lehmann) */
 .campaign-banner {
   background: linear-gradient(125deg, #1b4332 0%, #14532d 65%, #0f172a 100%);
@@ -291,6 +345,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
+  flex-wrap: wrap;
 }
 
 .btn-add-quote {
@@ -312,16 +367,37 @@
   background: #166534;
 }
 
+.btn-edit-seed {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  text-decoration: none;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .btn-delete-seed {
   background: #fef2f2;
   color: #dc2626;
   border: 1px solid #fecaca;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   cursor: pointer;
+}
+
+.btn-delete-seed:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .seed-summary-text {

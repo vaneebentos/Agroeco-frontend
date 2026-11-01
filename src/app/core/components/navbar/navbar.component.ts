@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter } from 'rxjs';
 import { CotizacionService } from '../../services/cotizacion.service';
 
 @Component({
@@ -12,9 +13,20 @@ import { CotizacionService } from '../../services/cotizacion.service';
 })
 export class NavbarComponent {
   cotizacionService = inject(CotizacionService);
+  private readonly router = inject(Router);
 
   isLargeText = false;
   isHighContrast = false;
+  esModoAdmin = false;
+
+  constructor() {
+    this.esModoAdmin = this.router.url.includes('admin');
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => {
+        this.esModoAdmin = event.urlAfterRedirects.includes('admin');
+      });
+  }
 
   toggleLargeText() {
     this.isLargeText = !this.isLargeText;
