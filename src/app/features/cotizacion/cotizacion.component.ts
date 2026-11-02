@@ -141,12 +141,15 @@ export class CotizacionComponent {
       esValido = false;
     }
 
-    // 4. CUIT (opcional, pero si se ingresa debe tener 11 dígitos numéricos)
+    // 4. CUIT (Obligatorio)
     const cuit = this.formData.cuit.trim();
-    if (cuit) {
+    if (!cuit) {
+      this.errores.cuit = 'El número de CUIT es obligatorio.';
+      esValido = false;
+    } else {
       const cuitDigitos = cuit.replace(/[-\s]/g, '');
       if (!/^\d{11}$/.test(cuitDigitos)) {
-        this.errores.cuit = 'El CUIT debe contener 11 dígitos numéricos (ej: 20-12345678-9).';
+        this.errores.cuit = 'El CUIT debe contener exactamente 11 dígitos numéricos (ej: 20-12345678-9).';
         esValido = false;
       }
     }
@@ -210,3 +213,4 @@ export class CotizacionComponent {
     });
   }
 }
+
