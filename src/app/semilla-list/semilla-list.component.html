@@ -1,1 +1,240 @@
-<p>semilla-list works!</p>
+<main class="agro-catalog-page notranslate" translate="no">
+
+  <!-- CARTEL DE NOTIFICACIÓN (Semilla Creada, Editada, Eliminada o Sumada a Cotización) -->
+  <div
+    *ngIf="alertaMensaje()"
+    class="agro-alert-banner"
+    [class.alert-exito]="alertaTipo() === 'exito'"
+    [class.alert-edicion]="alertaTipo() === 'edicion'"
+    [class.alert-eliminada]="alertaTipo() === 'eliminada'"
+    role="alert">
+    <div class="alert-left">
+      <span class="material-symbols-outlined notranslate" translate="no">
+        {{ alertaTipo() === 'eliminada' ? 'delete_forever' : (alertaTipo() === 'edicion' ? 'edit_note' : 'check_circle') }}
+      </span>
+      <strong>{{ alertaMensaje() }}</strong>
+    </div>
+    <button class="alert-close-btn" (click)="cerrarAlerta()" title="Cerrar aviso">✕</button>
+  </div>
+
+  <!-- 1. BANNER CAMPAÑA + BENEFICIOS (Inspirado en LG Campaña 2025 + Lehmann) -->
+  <section class="campaign-banner">
+    <div class="banner-left">
+      <span class="campaign-pill">CAMPAÑA 2025 / 2026 · SEMILLERO OFICIAL</span>
+      <h1>Catálogo Técnico de Semillas &amp; Genética Aplicada</h1>
+      <p>
+        Seleccioná el cultivo para explorar la ficha agronómica completa, la empresa elaboradora,
+        el comportamiento sanitario y las regiones donde mejor se adapta cada semilla.
+      </p>
+      <div class="benefits-row">
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined notranslate" translate="no">verified</span>
+          <span><strong>Seguro de Resiembra 100%</strong> ante granizo o planchado</span>
+        </div>
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined notranslate" translate="no">ac_unit</span>
+          <span><strong>Guarda en Cámara Fría</strong> sin costo adicional</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner-right">
+      <button class="btn-refresh-catalog" (click)="cargarSemillas()" [disabled]="loading()">
+        <span class="material-symbols-outlined notranslate" translate="no">refresh</span>
+        Actualizar desde Base de Datos ({{ dataSource().length }})
+      </button>
+    </div>
+  </section>
+
+  <!-- 2. TARJETAS DE ACCESO POR CULTIVO (Navegan a /semilla/maiz, /semilla/girasol, /semilla/trigo, /semilla/soja) -->
+  <section class="lehmann-categories">
+    <button
+      *ngFor="let cat of categoriasLehmann"
+      class="lehmann-cat-card"
+      [class.selected]="cultivoFiltro() === cat.codigo"
+      (click)="seleccionarCultivo(cat.codigo)">
+      <div class="cat-header">
+        <div class="cat-icon-box" [style.background]="cat.color">
+          <span class="material-symbols-outlined notranslate" translate="no">{{ cat.icono }}</span>
+        </div>
+        <span class="cat-title">{{ cat.titulo }}</span>
+      </div>
+      <p class="cat-desc">{{ cat.sub }}</p>
+    </button>
+  </section>
+
+  <!-- 3. ESTADOS DE CARGA / ERROR / VACÍO -->
+  <div *ngIf="loading()" class="state-panel">
+    <mat-spinner diameter="44"></mat-spinner>
+    <span>Cargando fichas técnicas de semillas desde AgroEco_API…</span>
+  </div>
+
+  <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel">
+    <mat-icon class="icon-error notranslate" translate="no">error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+    <button mat-flat-button color="primary" (click)="cargarSemillas()">Reintentar conexión</button>
+  </div>
+
+  <div *ngIf="!loading() && !errorMessage() && semillasFiltradas().length === 0" class="state-panel">
+    <mat-icon class="notranslate" translate="no">inventory_2</mat-icon>
+    <span>No hay semillas registradas para el filtro seleccionado.</span>
+    <button mat-stroked-button (click)="seleccionarCultivo('TODOS')">Ver todos los cultivos</button>
+  </div>
+
+  <!-- 4. GRILLA DE FICHAS TÉCNICAS EN TARJETAS ORDENADAS -->
+  <section *ngIf="!loading() && !errorMessage() && semillasFiltradas().length > 0" class="seeds-cards-grid">
+
+    <article class="seed-product-card" *ngFor="let semilla of semillasFiltradas()">
+
+      <!-- A. Cabecera del Producto + Empresa Elaboradora + Tecnología -->
+      <header class="seed-card-top">
+        <div class="seed-title-block">
+          <div class="seed-badges-line">
+            <span class="crop-tag">{{ semilla.cultivoNombre }}</span>
+            <span class="tech-tag">Tecnologías disponibles {{ semilla.tecnologiaBadge }}</span>
+            <span class="cycle-tag" [ngClass]="(semilla.ciclo || 'medio').toLowerCase()">
+              Ciclo {{ semilla.cicloFicha }}
+            </span>
+            <span class="status-pill" [class.active]="semilla.activo">
+              ● {{ semilla.activo ? 'Disponible' : 'Sin stock' }}
+              <ng-container *ngIf="semilla.stock !== undefined"> ({{ semilla.stock }} bolsas)</ng-container>
+            </span>
+          </div>
+
+          <h2 class="seed-variety-name">
+            {{ semilla.nombre }}
+            <small class="seed-db-id">{{ semilla.codigo || ('Código #' + semilla.id) }}</small>
+          </h2>
+
+          <!-- Empresa que elaboró el producto -->
+          <div class="elaborador-box">
+            <span class="material-symbols-outlined notranslate" translate="no">domain_verification</span>
+            <div>
+              <strong>Elaborado por:</strong> {{ semilla.empresaElaboradora }}
+              <span class="elaborador-sub">{{ semilla.origenLicencia }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="seed-top-actions">
+          <button *ngIf="!esModoAdmin()" class="btn-add-quote" (click)="agregarACotizacion(semilla)">
+            <span class="material-symbols-outlined notranslate" translate="no">add_shopping_cart</span>
+            Sumar a Cotización
+          </button>
+
+          <!-- BOTONES DE EDICIÓN Y BORRADO (SOLO VISIBLES EN /admin/panel) -->
+          <ng-container *ngIf="esModoAdmin()">
+            <a
+              [routerLink]="['/admin/panel', semilla.id, 'edit']"
+              class="btn-edit-seed"
+              title="Editar ficha técnica y sanidad de la semilla">
+              <span class="material-symbols-outlined notranslate" translate="no">edit</span>
+              Editar
+            </a>
+
+            <button
+              type="button"
+              class="btn-delete-seed"
+              [disabled]="deletingIds().has('' + semilla.id)"
+              (click)="eliminarSemilla(semilla)"
+              title="Eliminar semilla">
+              <span class="material-symbols-outlined notranslate" translate="no">delete</span>
+              {{ deletingIds().has('' + semilla.id) ? 'Eliminando…' : 'Eliminar' }}
+            </button>
+          </ng-container>
+        </div>
+      </header>
+
+      <!-- Resumen descriptivo de la base de datos -->
+      <p class="seed-summary-text">
+        <ng-container *ngIf="semilla.descripcion">{{ semilla.descripcion }} </ng-container>
+        <ng-container *ngIf="semilla.caracteristicas">{{ semilla.caracteristicas }}</ng-container>
+        <ng-container *ngIf="!semilla.descripcion && !semilla.caracteristicas">
+          Estabilidad y potencial en todos los ambientes.
+        </ng-container>
+      </p>
+
+      <!-- B. Las 3 sub-tarjetas internas ordenadas (Características + Sanidad + Dónde se adapta) -->
+      <div class="seed-inner-cards">
+
+        <!-- Sub-tarjeta 1: Características Agronómicas (Editables por cada semilla) -->
+        <div class="inner-box agro-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">analytics</span>
+            Características Agronómicas
+          </h3>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Cruzamiento</span>
+              <strong class="spec-val">{{ semilla.cruzamientoFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Ciclo</span>
+              <strong class="spec-val">{{ semilla.cicloFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Madurez relativa</span>
+              <strong class="spec-val">{{ semilla.madurezFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Días a floración</span>
+              <strong class="spec-val">{{ semilla.diasFloracionFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Tipo y color de grano</span>
+              <strong class="spec-val">{{ semilla.colorGranoFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Altura de planta (m)</span>
+              <strong class="spec-val">{{ semilla.alturaPlantaFicha }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Número de hileras</span>
+              <strong class="spec-val">{{ semilla.numeroHilerasFicha }}</strong>
+            </div>
+            <div class="spec-item highlight">
+              <span class="spec-label">Rinde potencial</span>
+              <strong class="spec-val">{{ semilla.rendimientoFicha }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-tarjeta 2: Comportamiento Sanitario (Editable por cada semilla) -->
+        <div class="inner-box health-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">shield_with_heart</span>
+            Comportamiento Sanitario
+          </h3>
+          <ul class="sanidad-list">
+            <li *ngFor="let item of semilla.sanidadFicha">
+              <span class="sanidad-name">{{ item.nombre }}:</span>
+              <span class="stars-row" [title]="item.puntos + ' de 5'">
+                <span
+                  *ngFor="let llena of estrellasArray(item.puntos)"
+                  class="star"
+                  [class.filled]="llena">★</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Sub-tarjeta 3: Dónde se adapta la semilla (Zonas de mayor adaptación) -->
+        <div class="inner-box zones-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">location_on</span>
+            Dónde se adapta la semilla
+          </h3>
+          <p class="zones-helper">Regiones agroecológicas recomendadas para expresar su máximo rinde:</p>
+          <div class="zones-chips">
+            <span class="zone-chip" *ngFor="let z of semilla.zonasFicha">
+              <span class="material-symbols-outlined notranslate" translate="no">check_circle</span>
+              {{ z }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+</main>
