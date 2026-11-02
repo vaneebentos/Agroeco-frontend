@@ -214,7 +214,7 @@ export class SemillaListComponent implements OnInit {
       this.cotizacionService.addItem(semillaConTemporadas);
     }
 
-    this.mostrarAlerta(`Se sumó "${semilla.nombre}" a tu solicitud de cotización.`, 'exito');
+    this.mostrarAlerta(`Se añadió "${semilla.nombre}" al carrito.`, 'exito');
   }
 
   eliminarSemilla(semilla: FichaSemillaExtendida): void {
@@ -437,3 +437,4 @@ export class SemillaListComponent implements OnInit {
     };
   }
 }
+
