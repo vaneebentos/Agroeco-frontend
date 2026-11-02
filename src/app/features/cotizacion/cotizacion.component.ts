@@ -18,6 +18,7 @@ export class CotizacionComponent {
   // Formulario del productor
   formData: ProducerFormData = {
     nombreApellido: '',
+    cuit: '',
     establecimiento: '',
     localidadZona: '',
     telefono: '',
@@ -48,6 +49,7 @@ export class CotizacionComponent {
 
     text += `Datos del productor:\n`;
     text += `Nombre: ${f.nombreApellido || '-'}\n`;
+    text += `CUIT: ${f.cuit || "-"}\n`;
     text += `Establecimiento: ${f.establecimiento || '-'}\n`;
     text += `Localidad / Zona: ${f.localidadZona || '-'}\n`;
     text += `Teléfono: ${f.telefono || '-'}\n`;
@@ -114,3 +116,4 @@ export class CotizacionComponent {
     });
   }
 }
+

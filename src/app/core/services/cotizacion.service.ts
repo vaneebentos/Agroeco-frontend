@@ -81,6 +81,7 @@ export class CotizacionService {
 
     const payload: CotizacionPayload = {
       nombre_cliente: formData.nombreApellido,
+      cuit: formData.cuit ? formData.cuit.trim() : undefined,
       email_cliente: formData.correo,
       telefono: formData.telefono,
       observaciones: observacionesGeneradas,
@@ -133,3 +134,4 @@ export class CotizacionService {
     ];
   }
 }
+

@@ -90,6 +90,11 @@
           </div>
 
           <div class="form-row">
+            <label>CUIT</label>
+            <input type="text" [(ngModel)]="formData.cuit" placeholder="Ej: 20-12345678-9" maxlength="13" />
+          </div>
+
+          <div class="form-row">
             <label>Establecimiento</label>
             <input type="text" [(ngModel)]="formData.establecimiento" placeholder="Ej: La Esperanza" />
           </div>
@@ -133,3 +138,4 @@
     </div>
   </div>
 </div>
+
