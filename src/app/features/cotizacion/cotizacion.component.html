@@ -86,12 +86,27 @@
         <div class="producer-form-card">
           <div class="form-row">
             <label>Nombre y apellido *</label>
-            <input type="text" [(ngModel)]="formData.nombreApellido" placeholder="Ej: Juan Pérez" />
+            <input 
+              type="text" 
+              [(ngModel)]="formData.nombreApellido" 
+              (input)="errores.nombreApellido = ''"
+              [class.input-error]="errores.nombreApellido"
+              placeholder="Ej: Juan Pérez" 
+            />
+            <span class="field-error-msg" *ngIf="errores.nombreApellido">{{ errores.nombreApellido }}</span>
           </div>
 
           <div class="form-row">
             <label>CUIT</label>
-            <input type="text" [(ngModel)]="formData.cuit" placeholder="Ej: 20-12345678-9" maxlength="13" />
+            <input 
+              type="text" 
+              [(ngModel)]="formData.cuit" 
+              (input)="errores.cuit = ''"
+              [class.input-error]="errores.cuit"
+              placeholder="Ej: 20-12345678-9" 
+              maxlength="13" 
+            />
+            <span class="field-error-msg" *ngIf="errores.cuit">{{ errores.cuit }}</span>
           </div>
 
           <div class="form-row">
@@ -106,12 +121,26 @@
 
           <div class="form-row">
             <label>Teléfono</label>
-            <input type="tel" [(ngModel)]="formData.telefono" placeholder="Ej: +54 9 2477 123456" />
+            <input 
+              type="tel" 
+              [(ngModel)]="formData.telefono" 
+              (input)="errores.telefono = ''"
+              [class.input-error]="errores.telefono"
+              placeholder="Ej: +54 9 2477 123456" 
+            />
+            <span class="field-error-msg" *ngIf="errores.telefono">{{ errores.telefono }}</span>
           </div>
 
           <div class="form-row">
             <label>Correo *</label>
-            <input type="email" [(ngModel)]="formData.correo" placeholder="Ej: productor@agro.com" />
+            <input 
+              type="email" 
+              [(ngModel)]="formData.correo" 
+              (input)="errores.correo = ''"
+              [class.input-error]="errores.correo"
+              placeholder="Ej: productor@agro.com" 
+            />
+            <span class="field-error-msg" *ngIf="errores.correo">{{ errores.correo }}</span>
           </div>
 
           <div class="form-row">
@@ -138,4 +167,3 @@
     </div>
   </div>
 </div>
-

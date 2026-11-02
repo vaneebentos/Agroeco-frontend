@@ -281,3 +281,17 @@
   margin-top: 0.5rem;
   border-radius: 8px;
 }
+
+/* Validation styles */
+.producer-form-card .form-row input.input-error,
+.producer-form-card .form-row textarea.input-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.producer-form-card .form-row .field-error-msg {
+  font-size: 0.78rem;
+  color: #dc2626;
+  font-weight: 500;
+  margin-top: 0.15rem;
+}
