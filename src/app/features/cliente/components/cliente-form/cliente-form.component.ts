@@ -1,6 +1,20 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges
+} from '@angular/core';
+
 import { Cliente, ClienteFormData } from '../../models/cliente.model';
-import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule
+} from '@angular/forms';
 
 @Component({
   selector: 'app-cliente-form',
@@ -10,11 +24,17 @@ import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angula
   styleUrl: './cliente-form.component.css'
 })
 export class ClienteFormComponent implements OnChanges {
+
   @Input() cliente: Cliente | null = null;
   @Input() errorServidor: string | null = null;
 
   @Output() guardar = new EventEmitter<ClienteFormData>();
   @Output() cancelar = new EventEmitter<void>();
+
+
+  get esEdicion(): boolean {
+    return this.cliente !== null;
+  }
 
   formulario = new FormGroup({
     nombre: new FormControl('', {
@@ -33,7 +53,6 @@ export class ClienteFormComponent implements OnChanges {
         Validators.required,
         Validators.email,
         Validators.maxLength(1500)
-
       ]
     }),
 
@@ -51,8 +70,9 @@ export class ClienteFormComponent implements OnChanges {
         Validators.required,
         Validators.pattern(/^\d{11}$/)
       ]
-    }),
+    })
   });
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['cliente']) {
@@ -64,15 +84,11 @@ export class ClienteFormComponent implements OnChanges {
           cuit: this.cliente.cuit ?? ''
         });
       } else {
-        this.formulario.reset({
-          nombre: '',
-          email: '',
-          telefono: '',
-          cuit: ''
-        });
+        this.limpiarFormulario();
       }
     }
   }
+
 
   guardarCliente(): void {
     if (this.formulario.invalid) {
@@ -83,16 +99,18 @@ export class ClienteFormComponent implements OnChanges {
     this.guardar.emit(this.formulario.getRawValue());
   }
 
-  // Cancela la operación
+
   cancelarFormulario(): void {
     this.cancelar.emit();
   }
+
 
   limpiarFormulario(): void {
     this.formulario.reset({
       nombre: '',
       email: '',
-      telefono: ''
+      telefono: '',
+      cuit: ''
     });
   }
 
@@ -128,13 +146,12 @@ export class ClienteFormComponent implements OnChanges {
       if (campo === 'telefono') {
         return 'El teléfono debe tener entre 8 y 20 caracteres y contener solo números o símbolos permitidos.';
       }
-    }
 
-    if (control.hasError('pattern') && campo === 'cuit') {
-      return 'El CUIT debe contener únicamente números y exactamente 11 dígitos.';
+      if (campo === 'cuit') {
+        return 'El CUIT debe contener únicamente números y exactamente 11 dígitos.';
+      }
     }
 
     return null;
   }
-
 }

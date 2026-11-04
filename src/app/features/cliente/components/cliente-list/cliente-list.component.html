@@ -8,3 +8,16 @@
   (guardar)="guardarCliente($event)"
   (cancelar)="cancelarFormulario()"
 />
+
+<app-tabla
+  [columnas]="columnas"
+  [datos]="clientes"
+  (editar)="editarCliente($event)"
+  (eliminar)="eliminarCliente($event)"
+></app-tabla>
+
+<app-cliente-delete
+  [cliente]="clienteAEliminar"
+  (confirmar)="confirmarEliminacion($event)"
+  (cancelar)="cancelarEliminacion()"
+></app-cliente-delete>

@@ -1,0 +1,34 @@
+<table>
+  <thead>
+    <tr>
+      <th *ngFor="let columna of columnas">
+        {{ columna.titulo }}
+      </th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let fila of datos">
+      <td *ngFor="let columna of columnas">
+        {{ fila[columna.campo] }}
+      </td>
+
+      <td>
+        <button (click)="editar.emit(fila)">
+          Editar
+        </button>
+
+        <button (click)="eliminar.emit(fila)">
+          Eliminar
+        </button>
+      </td>
+    </tr>
+
+    <tr *ngIf="datos.length === 0">
+      <td [attr.colspan]="columnas.length + 1">
+        No hay registros para mostrar.
+      </td>
+    </tr>
+  </tbody>
+</table>

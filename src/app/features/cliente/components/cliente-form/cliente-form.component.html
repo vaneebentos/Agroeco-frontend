@@ -1,3 +1,8 @@
+<h2>
+    {{ esEdicion ? 'Editar cliente' : 'Nuevo cliente' }}
+</h2>
+
+
 <form [formGroup]="formulario" (ngSubmit)="guardarCliente()">
 
     <!-- Nombre -->
@@ -48,8 +53,8 @@
 
     <!-- Botones -->
     <div>
-        <button type="submit" [disabled]="formulario.invalid">
-            {{ cliente ? 'Guardar cambios' : 'Crear cliente' }}
+        <button type="submit">
+            {{ esEdicion ? 'Actualizar cliente' : 'Crear cliente' }}
         </button>
 
         <button type="button" (click)="cancelarFormulario()">
