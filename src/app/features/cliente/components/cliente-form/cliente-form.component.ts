@@ -44,6 +44,14 @@ export class ClienteFormComponent implements OnChanges {
         Validators.pattern(/^[0-9+\-() ]{8,20}$/)
       ]
     }),
+
+    cuit: new FormControl('', {
+      nonNullable: true,
+      validators: [
+        Validators.required,
+        Validators.pattern(/^\d{11}$/)
+      ]
+    }),
   });
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -52,13 +60,15 @@ export class ClienteFormComponent implements OnChanges {
         this.formulario.patchValue({
           nombre: this.cliente.nombre ?? '',
           email: this.cliente.email ?? '',
-          telefono: this.cliente.telefono ?? ''
+          telefono: this.cliente.telefono ?? '',
+          cuit: this.cliente.cuit ?? ''
         });
       } else {
         this.formulario.reset({
           nombre: '',
           email: '',
-          telefono: ''
+          telefono: '',
+          cuit: ''
         });
       }
     }
@@ -118,6 +128,10 @@ export class ClienteFormComponent implements OnChanges {
       if (campo === 'telefono') {
         return 'El teléfono debe tener entre 8 y 20 caracteres y contener solo números o símbolos permitidos.';
       }
+    }
+
+    if (control.hasError('pattern') && campo === 'cuit') {
+      return 'El CUIT debe contener únicamente números y exactamente 11 dígitos.';
     }
 
     return null;

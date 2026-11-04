@@ -30,6 +30,16 @@
         }
     </div>
 
+    <div>
+        <label for="cuit">CUIT</label>
+        <input id="cuit" type="text" formControlName="cuit" placeholder="Ingrese el CUIT" />
+
+        @if (obtenerError('cuit'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+
     @if (errorServidor) {
     <div class="error-servidor">
         {{ errorServidor }}
