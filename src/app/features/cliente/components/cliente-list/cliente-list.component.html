@@ -1,11 +1,34 @@
-
 @if (mensajeExito) {
   <p>{{ mensajeExito }}</p>
 }
 
-<button type="button" (click)="abrirCrearCliente()">
-  Nuevo cliente
-</button>
+<div class="pagina-header">
+  <div class="pagina-titulo">
+    <h1>Gestión de clientes</h1>
+    <span>Administrá, consultá y gestioná los clientes registrados en AgroEco.</span>
+  </div>
+
+  <button type="button" (click)="abrirCrearCliente()">
+    <span class="material-symbols-outlined">person_add</span>
+    Nuevo cliente
+  </button>
+</div>
+
+<div class="listado-header">
+  <div>
+    <h2>Listado de clientes</h2>
+    <span>Consultá la información de los clientes registrados.</span>
+  </div>
+
+  <div class="buscador">
+    <input
+      type="text"
+      placeholder="Buscar por nombre, email o CUIT..."
+      [value]="terminoBusqueda"
+      (input)="buscarClientes($any($event.target).value)"
+    />
+  </div>
+</div>
 
 <app-tabla
   [columnas]="columnas"
@@ -13,7 +36,6 @@
   (editar)="editarCliente($event)"
   (eliminar)="eliminarCliente($event)"
 ></app-tabla>
-
 <app-modal
   [abierto]="modalAbierto"
   [titulo]="tipoModal === 'formulario'

@@ -49,4 +49,12 @@ crearCliente(
   ): Observable<Cliente> {
     return this.http.put<Cliente>(`${this.apiUrl}/id/${id}`, data);
   }
+
+  buscarClientes(termino: string): Observable<Cliente[]> {
+  return this.http.get<Cliente[]>(
+    `${this.apiUrl}/buscar?q=${encodeURIComponent(termino)}`
+  );
+}
+
+
 }

@@ -34,11 +34,14 @@ export class ClienteListComponent implements OnInit {
   clienteSeleccionado: Cliente | null = null;
   clienteAEliminar: Cliente | null = null;
 
+
   errorServidor: string | null = null;
   mensajeExito: string | null = null;
 
   modalAbierto = false;
   tipoModal: 'formulario' | 'eliminar' | null = null;
+
+  terminoBusqueda = '';
 
   columnas: ColumnaTabla[] = [
     { campo: 'nombre', titulo: 'Nombre' },
@@ -152,6 +155,27 @@ export class ClienteListComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.errorServidor =
           error.error?.message || 'Error al eliminar el cliente.';
+      }
+    });
+  }
+
+
+  buscarClientes(termino: string): void {
+    this.terminoBusqueda = termino;
+
+    if (!termino.trim()) {
+      this.getAllClientes();
+      return;
+    }
+
+    this.clienteService.buscarClientes(termino).subscribe({
+      next: (clientes) => {
+        this.clientes = clientes.filter(cliente => cliente.activo);
+        this.errorServidor = null;
+      },
+      error: (error: HttpErrorResponse) => {
+        this.errorServidor =
+          error.error?.message || 'Error al buscar clientes.';
       }
     });
   }
