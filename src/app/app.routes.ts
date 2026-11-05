@@ -20,8 +20,8 @@ export const routes: Routes = [
   { path: 'admin/panel/:id/edit', component: SemillaFormComponent },
 
   // Módulo de clientes
-  { path: 'clientes', component: ClienteListComponent },
-  { path: 'clientes/form', component: ClienteFormComponent },
+  { path: 'admin/panel/clientes', component: ClienteListComponent },
+  { path: 'admin/panel/clientes/form', component: ClienteFormComponent },
 
   // Cotización
   { path: 'cotizacion', component: CotizacionComponent },
