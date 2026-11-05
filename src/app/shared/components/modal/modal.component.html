@@ -1,0 +1,28 @@
+
+@if (abierto) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+
+    <div
+      class="modal-contenido"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <h2>{{ titulo }}</h2>
+
+        <button
+          type="button"
+          class="btn-cerrar"
+          (click)="cerrarModal()"
+          aria-label="Cerrar modal"
+        >
+          &times;
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+    </div>
+
+  </div>
+}

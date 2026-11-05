@@ -1,4 +1,5 @@
-import { Component, ViewChild, OnInit } from '@angular/core';
+
+import { Component, OnInit } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { ClienteFormData, Cliente } from '../../models/cliente.model';
@@ -12,21 +13,21 @@ import {
   ColumnaTabla
 } from '../../../../shared/components/tabla/tabla.component';
 
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
+
 @Component({
   selector: 'app-cliente-list',
   standalone: true,
   imports: [
     ClienteFormComponent,
     ClienteDeleteComponent,
-    TablaComponent
+    TablaComponent,
+    ModalComponent
   ],
   templateUrl: './cliente-list.component.html',
   styleUrl: './cliente-list.component.css'
 })
 export class ClienteListComponent implements OnInit {
-
-  @ViewChild(ClienteFormComponent)
-  formularioCliente!: ClienteFormComponent;
 
   clientes: Cliente[] = [];
 
@@ -35,6 +36,9 @@ export class ClienteListComponent implements OnInit {
 
   errorServidor: string | null = null;
   mensajeExito: string | null = null;
+
+  modalAbierto = false;
+  tipoModal: 'formulario' | 'eliminar' | null = null;
 
   columnas: ColumnaTabla[] = [
     { campo: 'nombre', titulo: 'Nombre' },
@@ -61,67 +65,88 @@ export class ClienteListComponent implements OnInit {
     });
   }
 
-guardarCliente(datos: ClienteFormData): void {
-  this.errorServidor = null;
-  this.mensajeExito = null;
-
-  if (this.clienteSeleccionado) {
-    this.clienteService.updateCliente(this.clienteSeleccionado.id, datos).subscribe({
-      next: (respuesta) => {
-        this.mensajeExito = 'Cliente actualizado correctamente.';
-        this.clienteSeleccionado = null;
-        this.formularioCliente.limpiarFormulario();
-        this.getAllClientes();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorServidor =
-          error.error?.message || 'Error al actualizar el cliente.';
-      }
-    });
-
-  } else {
-    this.clienteService.crearCliente(datos).subscribe({
-      next: (respuesta) => {
-        if (!respuesta.creado) {
-          this.errorServidor = respuesta.message;
-          return;
-        }
-
-        this.mensajeExito = respuesta.message;
-        this.formularioCliente.limpiarFormulario();
-        this.getAllClientes();
-      },
-      error: (error: HttpErrorResponse) => {
-        this.errorServidor =
-          error.error?.message || 'Ocurrió un error al guardar el cliente.';
-      }
-    });
-  }
-}
-
-  cancelarFormulario(): void {
+  abrirCrearCliente(): void {
     this.clienteSeleccionado = null;
     this.errorServidor = null;
     this.mensajeExito = null;
+
+    this.tipoModal = 'formulario';
+    this.modalAbierto = true;
   }
 
 
   editarCliente(cliente: Cliente): void {
     this.clienteSeleccionado = cliente;
+    this.errorServidor = null;
+    this.mensajeExito = null;
+
+    this.tipoModal = 'formulario';
+    this.modalAbierto = true;
   }
+
 
   eliminarCliente(cliente: Cliente): void {
     this.clienteAEliminar = cliente;
     this.errorServidor = null;
     this.mensajeExito = null;
+
+    this.tipoModal = 'eliminar';
+    this.modalAbierto = true;
   }
 
+  cerrarModal(): void {
+    this.modalAbierto = false;
+    this.tipoModal = null;
+    this.clienteSeleccionado = null;
+    this.clienteAEliminar = null;
+    this.errorServidor = null;
+  }
+
+  guardarCliente(datos: ClienteFormData): void {
+    this.errorServidor = null;
+    this.mensajeExito = null;
+
+    if (this.clienteSeleccionado) {
+      this.clienteService.updateCliente(
+        this.clienteSeleccionado.id,
+        datos
+      ).subscribe({
+        next: () => {
+          this.mensajeExito = 'Cliente actualizado correctamente.';
+          this.cerrarModal();
+          this.getAllClientes();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorServidor =
+            error.error?.message || 'Error al actualizar el cliente.';
+        }
+      });
+
+    } else {
+      this.clienteService.crearCliente(datos).subscribe({
+        next: (respuesta) => {
+          if (!respuesta.creado) {
+            this.errorServidor = respuesta.message;
+            return;
+          }
+
+          this.mensajeExito = respuesta.message;
+          this.cerrarModal();
+          this.getAllClientes();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.errorServidor =
+            error.error?.message || 'Ocurrió un error al guardar el cliente.';
+        }
+      });
+    }
+  }
 
   confirmarEliminacion(cliente: Cliente): void {
     this.clienteService.deleteClienteById(cliente.id).subscribe({
       next: () => {
         this.mensajeExito = 'Cliente eliminado correctamente.';
-        this.clienteAEliminar = null;
+        this.cerrarModal();
         this.getAllClientes();
       },
       error: (error: HttpErrorResponse) => {
@@ -129,11 +154,6 @@ guardarCliente(datos: ClienteFormData): void {
           error.error?.message || 'Error al eliminar el cliente.';
       }
     });
-  }
-
-
-  cancelarEliminacion(): void {
-    this.clienteAEliminar = null;
   }
 
 }

@@ -1,13 +1,11 @@
+
 @if (mensajeExito) {
   <p>{{ mensajeExito }}</p>
 }
 
-<app-cliente-form
-  [cliente]="clienteSeleccionado"
-  [errorServidor]="errorServidor"
-  (guardar)="guardarCliente($event)"
-  (cancelar)="cancelarFormulario()"
-/>
+<button type="button" (click)="abrirCrearCliente()">
+  Nuevo cliente
+</button>
 
 <app-tabla
   [columnas]="columnas"
@@ -16,8 +14,29 @@
   (eliminar)="eliminarCliente($event)"
 ></app-tabla>
 
-<app-cliente-delete
-  [cliente]="clienteAEliminar"
-  (confirmar)="confirmarEliminacion($event)"
-  (cancelar)="cancelarEliminacion()"
-></app-cliente-delete>
+<app-modal
+  [abierto]="modalAbierto"
+  [titulo]="tipoModal === 'formulario'
+    ? (clienteSeleccionado ? 'Editar cliente' : 'Nuevo cliente')
+    : 'Eliminar cliente'"
+  (cerrar)="cerrarModal()"
+>
+
+  @if (tipoModal === 'formulario') {
+    <app-cliente-form
+      [cliente]="clienteSeleccionado"
+      [errorServidor]="errorServidor"
+      (guardar)="guardarCliente($event)"
+      (cancelar)="cerrarModal()"
+    />
+  }
+
+  @if (tipoModal === 'eliminar') {
+    <app-cliente-delete
+      [cliente]="clienteAEliminar"
+      (confirmar)="confirmarEliminacion($event)"
+      (cancelar)="cerrarModal()"
+    />
+  }
+
+</app-modal>

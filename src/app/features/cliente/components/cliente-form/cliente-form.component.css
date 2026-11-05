@@ -1,0 +1,139 @@
+
+:host {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  color: #0F172A;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+form > div:not(.error-servidor) {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+
+label {
+  color: #1E293B;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+
+  background-color: #FFFFFF;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+
+  color: #0F172A;
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input::placeholder {
+  color: #94A3B8;
+}
+
+input:hover {
+  border-color: #94A3B8;
+}
+
+input:focus {
+  border-color: #15803D;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12);
+}
+
+
+small {
+  color: #D91B23;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.error-servidor {
+  padding: 12px 14px;
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+
+  color: #B91C1C;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+form > div:last-child {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+
+button {
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+
+button[type="submit"] {
+  background-color: #15803D;
+  border-color: #15803D;
+  color: #FFFFFF;
+}
+
+button[type="submit"]:hover {
+  background-color: #11783B;
+}
+
+
+button[type="button"] {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #475569;
+}
+
+button[type="button"]:hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+
+button:focus-visible {
+  outline: 3px solid rgba(21, 128, 61, 0.2);
+  outline-offset: 2px;
+}
+
+
+@media (max-width: 480px) {
+  form > div:last-child {
+    flex-direction: column-reverse;
+  }
+
+  form > div:last-child button {
+    width: 100%;
+  }
+}

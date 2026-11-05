@@ -1,34 +1,44 @@
-<table>
-  <thead>
-    <tr>
-      <th *ngFor="let columna of columnas">
-        {{ columna.titulo }}
-      </th>
-      <th>Acciones</th>
-    </tr>
-  </thead>
+<div class="tabla-container">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th *ngFor="let columna of columnas">
+          {{ columna.titulo }}
+        </th>
+        <th class="columna-acciones">Acciones</th>
+      </tr>
+    </thead>
 
-  <tbody>
-    <tr *ngFor="let fila of datos">
-      <td *ngFor="let columna of columnas">
-        {{ fila[columna.campo] }}
-      </td>
+    <tbody>
+      <tr *ngFor="let fila of datos">
+        <td *ngFor="let columna of columnas">
+          {{ fila[columna.campo] || '-' }}
+        </td>
 
-      <td>
-        <button (click)="editar.emit(fila)">
-          Editar
-        </button>
+        <td class="acciones">
+          <button
+            type="button"
+            class="btn-accion btn-editar"
+            (click)="editar.emit(fila)"
+          >
+            Editar
+          </button>
 
-        <button (click)="eliminar.emit(fila)">
-          Eliminar
-        </button>
-      </td>
-    </tr>
+          <button
+            type="button"
+            class="btn-accion btn-eliminar"
+            (click)="eliminar.emit(fila)"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
 
-    <tr *ngIf="datos.length === 0">
-      <td [attr.colspan]="columnas.length + 1">
-        No hay registros para mostrar.
-      </td>
-    </tr>
-  </tbody>
-</table>
+      <tr *ngIf="datos.length === 0">
+        <td [attr.colspan]="columnas.length + 1" class="tabla-vacia">
+          No hay registros para mostrar.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

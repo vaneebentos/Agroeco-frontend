@@ -1,0 +1,90 @@
+
+:host {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', 'Roboto', system-ui, sans-serif;
+  color: #0F172A;
+}
+
+
+.confirmacion {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+
+.confirmacion h3 {
+  margin: 0;
+  color: #0F172A;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+/* MENSAJE */
+.confirmacion p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.confirmacion strong {
+  color: #0F172A;
+  font-weight: 700;
+}
+
+
+.confirmacion {
+  align-items: stretch;
+}
+
+
+.confirmacion button {
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.confirmacion button:first-of-type {
+  background-color: #D91B23;
+  border-color: #D91B23;
+  color: #FFFFFF;
+}
+
+.confirmacion button:first-of-type:hover {
+  background-color: #B91C1C;
+  border-color: #B91C1C;
+}
+
+
+.confirmacion button:last-of-type {
+  background-color: #FFFFFF;
+  border-color: #E2E8F0;
+  color: #475569;
+}
+
+.confirmacion button:last-of-type:hover {
+  background-color: #F1F5F9;
+  border-color: #CBD5E1;
+}
+
+
+.confirmacion button:focus-visible {
+  outline: 3px solid rgba(217, 27, 35, 0.2);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .confirmacion button {
+    width: 100%;
+  }
+}
