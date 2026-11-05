@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.form-page {
+  min-height: calc(100vh - 72px);
+  box-sizing: border-box;
+  padding: clamp(16px, 3vw, 40px);
+  background: #f4f7f4;
+}
+
+mat-card {
+  max-width: 960px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #d8e2dc;
+  box-shadow: 0 8px 24px rgba(27, 67, 50, 0.06);
+}
+
+mat-card-header {
+  padding: 24px 24px 16px;
+}
+
+mat-card-title {
+  color: #1b4332;
+  font-weight: 800;
+  font-size: 1.45rem;
+}
+
+mat-card-content {
+  padding: 8px 24px 24px;
+}
+
+.form-section-title {
+  margin: 20px 0 10px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1b4332;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+  margin-top: 8px;
+}
+
+.wide-field {
+  grid-column: 1 / -1;
+}
+
+.sanidad-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.sanidad-section-header .form-section-title {
+  margin: 0;
+  border-bottom: none;
+}
+
+.sanidad-form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.sanidad-form-row {
+  display: grid;
+  grid-template-columns: 1fr 240px auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.active-checkbox {
+  display: block;
+  margin-top: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1b4332;
+  color: #ffffff;
+}
+
+.error-message {
+  color: #b91c1c;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wide-field {
+    grid-column: auto;
+  }
+
+  .sanidad-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.loading-panel {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #4b5563;
+}

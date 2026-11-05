@@ -9,6 +9,7 @@ export interface CartItem {
 
 export interface CotizacionPayload {
   nombre_cliente: string;
+  cuit?: string;
   email_cliente: string;
   telefono: string;
   observaciones: string;
@@ -23,6 +24,7 @@ export interface CotizacionPayload {
 
 export interface ProducerFormData {
   nombreApellido: string;
+  cuit: string;
   establecimiento: string;
   localidadZona: string;
   telefono: string;

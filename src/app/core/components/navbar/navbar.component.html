@@ -1,18 +1,14 @@
-<header class="header">
+<header class="header notranslate" translate="no">
   <div class="header-content">
-    <a routerLink="/semillas" class="brand">
+    <a routerLink="/" class="brand">
       <div class="brand-icon">
-        <span class="material-symbols-outlined">eco</span>
+        <span class="material-symbols-outlined notranslate" translate="no">eco</span>
       </div>
       <span class="brand-text">AgroEco</span>
     </a>
 
-    <nav class="nav-links">
-      <a routerLink="/semillas" routerLinkActive="active" class="nav-item">Semillas</a>
-      <a routerLink="/clientes" routerLinkActive="active" class="nav-item">Clientes</a>
-    </nav>
-
-    <div class="actions">
+    <!-- ACCIONES EN VISTA CLIENTE -->
+    <div class="actions" *ngIf="!esModoAdmin">
       <button 
         class="icon-btn text-size-btn" 
         (click)="toggleLargeText()" 
@@ -24,13 +20,26 @@
         class="icon-btn contrast-btn" 
         (click)="toggleHighContrast()" 
         [title]="isHighContrast ? 'Modo estándar' : 'Modo alto contraste'">
-        <span class="material-symbols-outlined">contrast</span>
+        <span class="material-symbols-outlined notranslate" translate="no">contrast</span>
       </button>
 
       <a routerLink="/cotizacion" class="cotizar-btn">
-        <span class="material-symbols-outlined cart-icon">shopping_cart</span>
+        <span class="material-symbols-outlined cart-icon notranslate" translate="no">shopping_cart</span>
         <span class="btn-text">Pedir cotización</span>
         <span class="cart-badge" *ngIf="cotizacionService.count() > 0">{{ cotizacionService.count() }}</span>
+      </a>
+    </div>
+
+    <!-- ACCIONES EN VISTA ADMIN (/admin/panel) -->
+    <div class="actions" *ngIf="esModoAdmin">
+      <a routerLink="/admin/panel/new" class="header-admin-new-btn">
+        <span class="material-symbols-outlined notranslate" translate="no">add_circle</span>
+        <span>+ Nueva Semilla</span>
+      </a>
+
+      <a routerLink="/" class="header-admin-client-btn">
+        <span class="material-symbols-outlined notranslate" translate="no">visibility</span>
+        <span>Ver como Cliente</span>
       </a>
     </div>
   </div>

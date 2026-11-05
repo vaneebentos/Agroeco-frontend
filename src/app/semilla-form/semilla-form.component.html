@@ -1,1 +1,224 @@
-<p>semilla-form works!</p>
+<main class="form-page notranslate" translate="no">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ isEditing() ? 'Editar semilla' : 'Nueva semilla' }}</mat-card-title>
+      <mat-card-subtitle>{{
+        isEditing()
+          ? 'Modificá los datos generales, las características agronómicas y el comportamiento sanitario de la semilla'
+          : 'Completá la ficha técnica agronómica y el comportamiento sanitario para guardar la semilla en la base de datos'
+      }}</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading-panel" role="status">
+          <mat-spinner diameter="36"></mat-spinner>Cargando semilla…
+        </div>
+      }
+      @if (loadFailed()) {
+        <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        <a mat-button routerLink="/admin/panel">Volver al panel de administración</a>
+      }
+      @if (!loading() && !loadFailed()) {
+        <form [formGroup]="form" (ngSubmit)="submit()">
+
+          <!-- SECCIÓN 1: IDENTIFICACIÓN Y CULTIVO -->
+          <h3 class="form-section-title">1. Identificación y Tecnología</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Código de Semilla</mat-label>
+              <input matInput formControlName="codigo" placeholder="Ej: LG-30646" />
+              @if (
+                form.controls.codigo.hasError('required') || form.controls.codigo.hasError('pattern')
+              ) {
+                <mat-error>El código es obligatorio</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Nombre Comercial / Variedad</mat-label>
+              <input matInput formControlName="nombre" placeholder="Ej: LG 30646" />
+              @if (
+                form.controls.nombre.hasError('required') || form.controls.nombre.hasError('pattern')
+              ) {
+                <mat-error>El nombre es obligatorio</mat-error>
+              } @else if (form.controls.nombre.hasError('maxlength')) {
+                <mat-error>El máximo es de 255 caracteres</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Cultivo</mat-label>
+              <mat-select formControlName="cultivo_id" (selectionChange)="onCultivoChange($event.value)">
+                @for (c of cultivosOpciones; track c.id) {
+                  <mat-option [value]="c.id">{{ c.nombre }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tecnologías disponibles</mat-label>
+              <input matInput formControlName="tecnologia" placeholder="Ej: VIP3, VT3PRO, Clearfield CL" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Semilla</mat-label>
+              <mat-select formControlName="tipo">
+                <mat-option value="HIBRIDA">Híbrida (HIBRIDA)</mat-option>
+                <mat-option value="COMUN">Variedad / Común (COMUN)</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría Fiscalizada</mat-label>
+              <mat-select formControlName="categoria">
+                <mat-option value="PRIMERA">Primera Multiplicación (PRIMERA)</mat-option>
+                <mat-option value="SEGUNDA">Segunda Multiplicación (SEGUNDA)</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Stock Disponible (bolsas)</mat-label>
+              <input matInput type="number" formControlName="stock" />
+              @if (form.controls.stock.invalid) {
+                <mat-error>El stock no puede ser negativo</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Rendimiento Estimado (t/ha)</mat-label>
+              <input matInput type="number" step="0.1" formControlName="rendimiento_estimado" />
+              @if (form.controls.rendimiento_estimado.invalid) {
+                <mat-error>Ingresá un rendimiento válido</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="wide-field">
+              <mat-label>Descripción Principal (Subtítulo de la ficha)</mat-label>
+              <input
+                matInput
+                formControlName="descripcion"
+                placeholder="Ej: Estabilidad y potencial en todos los ambientes"
+              />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="wide-field">
+              <mat-label>Observaciones / Resumen Adicional</mat-label>
+              <textarea
+                matInput
+                rows="2"
+                formControlName="caracteristicas"
+                placeholder="Ej: Altísima estabilidad de rendimiento y excelente perfil sanitario."
+              ></textarea>
+            </mat-form-field>
+          </div>
+
+          <!-- SECCIÓN 2: CARACTERÍSTICAS AGRONÓMICAS (Propias de cada semilla) -->
+          <h3 class="form-section-title">2. Características Agronómicas</h3>
+          <div class="form-grid">
+            <mat-form-field appearance="outline">
+              <mat-label>Cruzamiento</mat-label>
+              <input matInput formControlName="cruzamiento" placeholder="Ej: Simple" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Ciclo</mat-label>
+              <mat-select formControlName="ciclo">
+                @for (c of ciclosOpciones; track c.valor) {
+                  <mat-option [value]="c.valor">{{ c.etiqueta }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Madurez relativa</mat-label>
+              <input matInput formControlName="madurez_relativa" placeholder="Ej: 120" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Días a floración</mat-label>
+              <input matInput formControlName="dias_floracion" placeholder="Ej: 73" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo y color de grano</mat-label>
+              <input matInput formControlName="color_grano" placeholder="Ej: Semidentado amarillo" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Altura de planta (m)</mat-label>
+              <input matInput formControlName="altura_planta" placeholder="Ej: 2,11" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Número de hileras</mat-label>
+              <input matInput formControlName="numero_hileras" placeholder="Ej: 18" />
+            </mat-form-field>
+          </div>
+
+          <!-- SECCIÓN 3: COMPORTAMIENTO SANITARIO (Propio de cada semilla) -->
+          <div class="sanidad-section-header">
+            <h3 class="form-section-title">3. Comportamiento Sanitario (Tolerancias)</h3>
+            <button type="button" mat-stroked-button (click)="agregarItemSanidad()">
+              + Agregar tolerancia
+            </button>
+          </div>
+
+          <div class="sanidad-form-list" formArrayName="sanidad">
+            @for (grupo of sanidadFormArray.controls; track $index) {
+              <div class="sanidad-form-row" [formGroupName]="$index">
+                <mat-form-field appearance="outline" class="sanidad-name-field">
+                  <mat-label>Enfermedad / Tolerancia</mat-label>
+                  <input
+                    matInput
+                    formControlName="nombre"
+                    placeholder="Ej: Tolerancia Roya, Tolerancia a Mal de Río IV"
+                  />
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="sanidad-score-field">
+                  <mat-label>Puntaje (1 a 5 ★)</mat-label>
+                  <mat-select formControlName="puntos">
+                    @for (p of puntajesSanidad; track p.valor) {
+                      <mat-option [value]="p.valor">{{ p.etiqueta }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+
+                <button
+                  type="button"
+                  mat-icon-button
+                  color="warn"
+                  (click)="eliminarItemSanidad($index)"
+                  [disabled]="sanidadFormArray.length <= 1"
+                  title="Quitar ítem sanitario">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <mat-checkbox formControlName="activo" class="wide-field active-checkbox">
+            Semilla activa y disponible en campaña
+          </mat-checkbox>
+
+          @if (errorMessage()) {
+            <p class="error-message" role="alert">{{ errorMessage() }}</p>
+          }
+
+          <div class="actions">
+            <a mat-button routerLink="/admin/panel">Cancelar</a>
+            <button mat-flat-button type="submit" [disabled]="saving()">
+              @if (saving()) {
+                <mat-spinner diameter="20"></mat-spinner>
+                Guardando…
+              } @else {
+                {{ isEditing() ? 'Guardar cambios' : 'Crear semilla' }}
+              }
+            </button>
+          </div>
+        </form>
+      }
+    </mat-card-content>
+  </mat-card>
+</main>
