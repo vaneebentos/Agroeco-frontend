@@ -16,7 +16,7 @@ export interface FichaSemillaExtendida extends Semilla {
   empresaElaboradora: string;
   origenLicencia: string;
   cultivoNombre: string;
-  tecnologiaBadge: string;
+  insigniaTecnologia: string;
   cruzamientoFicha: string;
   cicloFicha: string;
   madurezFicha: string;
@@ -29,9 +29,9 @@ export interface FichaSemillaExtendida extends Semilla {
   zonasFicha: string[];
 }
 
-const TEMPORADAS_DISPONIBLES_DEFAULT = ['2025/26 Temprana', '2025/26 Tardía'];
+const TEMPORADAS_DISPONIBLES_POR_DEFECTO = ['2025/26 Temprana', '2025/26 Tardía'];
 
-const SLUG_A_CULTIVO: Record<string, string> = {
+const RUTA_A_CULTIVO: Record<string, string> = {
   maiz: 'Maíz',
   'maíz': 'Maíz',
   girasol: 'Girasol',
@@ -39,7 +39,7 @@ const SLUG_A_CULTIVO: Record<string, string> = {
   soja: 'Soja',
 };
 
-const CULTIVO_A_SLUG: Record<string, string> = {
+const CULTIVO_A_RUTA: Record<string, string> = {
   'Maíz': 'maiz',
   Girasol: 'girasol',
   Trigo: 'trigo',
@@ -62,20 +62,23 @@ const CULTIVO_A_SLUG: Record<string, string> = {
   styleUrl: './semilla-list.component.css'
 })
 export class SemillaListComponent implements OnInit {
-  readonly dataSource = signal<FichaSemillaExtendida[]>([]);
-  readonly loading = signal(false);
-  readonly errorMessage = signal('');
+  readonly listaSemillas = signal<FichaSemillaExtendida[]>([]);
+  readonly tablaCatalogoBD = signal<FichaSemillaExtendida[]>([]);
+  readonly cargando = signal(false);
+  readonly cargandoTablaBD = signal(false);
+  readonly mensajeError = signal('');
   readonly cultivoFiltro = signal<string>('TODOS');
-  readonly deletingIds = signal<Set<string>>(new Set());
+  readonly idsEliminando = signal<Set<string>>(new Set());
 
-  // Separación Vista Cliente (/ o /semilla/:cultivo) vs Vista Admin (/admin/panel)
+  // Separación Vista Cliente (/ o /semilla/:cultivo) vs Vista Admin (/admin/panel y /admin/panel/catalogo)
   readonly esModoAdmin = signal(false);
+  readonly esVistaTablaCatalogo = signal(false);
 
   // Cartel de notificación (Semilla creada, editada, eliminada o sumada a cotización)
   readonly alertaMensaje = signal('');
   readonly alertaTipo = signal<'exito' | 'edicion' | 'eliminada'>('exito');
 
-  readonly categoriasLehmann = [
+  readonly categoriasCatalogo = [
     { codigo: 'TODOS', titulo: 'Catálogo Completo', sub: 'Todas las variedades e híbridos disponibles', icono: 'grid_view', color: '#1b4332' },
     { codigo: 'Maíz', titulo: 'Maíz Híbrido', sub: 'Alta potencialidad VIP3 y VT3PRO para grano y silaje', icono: 'grass', color: '#ca8a04' },
     { codigo: 'Girasol', titulo: 'Girasol', sub: 'Híbridos Clearfield de alto contenido graso', icono: 'wb_sunny', color: '#d97706' },
@@ -85,10 +88,18 @@ export class SemillaListComponent implements OnInit {
 
   readonly semillasFiltradas = computed(() => {
     const filtro = this.cultivoFiltro();
-    const lista = this.dataSource();
+    const lista = this.listaSemillas();
     if (filtro === 'TODOS') return lista;
     return lista.filter(s => s.cultivoNombre.toLowerCase() === filtro.toLowerCase());
   });
+
+  readonly semillasActivasBD = computed(() =>
+    this.tablaCatalogoBD().filter(s => !s.eliminado)
+  );
+
+  readonly semillasEliminadasBD = computed(() =>
+    this.tablaCatalogoBD().filter(s => Boolean(s.eliminado))
+  );
 
   constructor(
     private readonly semillaService: SemillaService,
@@ -98,29 +109,30 @@ export class SemillaListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.esModoAdmin.set(this.router.url.includes('admin'));
+    const urlActual = this.router.url;
+    this.esModoAdmin.set(urlActual.includes('admin'));
+    this.esVistaTablaCatalogo.set(urlActual.includes('admin/panel/catalogo'));
 
-    // Escucha el parámetro :cultivo de la ruta (/semilla/maiz, /semilla/soja, etc.)
-    this.route.paramMap.subscribe(params => {
-      const slug = params.get('cultivo')?.toLowerCase().trim() || '';
-      if (slug && SLUG_A_CULTIVO[slug]) {
-        this.cultivoFiltro.set(SLUG_A_CULTIVO[slug]);
+    this.route.paramMap.subscribe(parametros => {
+      const rutaCultivo = parametros.get('cultivo')?.toLowerCase().trim() || '';
+      if (rutaCultivo && RUTA_A_CULTIVO[rutaCultivo]) {
+        this.cultivoFiltro.set(RUTA_A_CULTIVO[rutaCultivo]);
       } else if (!this.esModoAdmin()) {
         this.cultivoFiltro.set('TODOS');
       }
     });
 
-    this.route.queryParamMap.subscribe(params => {
-      const alerta = params.get('alerta');
-      const nombre = params.get('nombre') || 'la semilla';
+    this.route.queryParamMap.subscribe(parametros => {
+      const alerta = parametros.get('alerta');
+      const nombre = parametros.get('nombre') || 'la semilla';
       if (alerta === 'creada') {
         this.mostrarAlerta(
-          `¡Semilla "${nombre}" creada y guardada correctamente !`,
+          `¡Semilla "${nombre}" creada correctamente!`,
           'exito'
         );
       } else if (alerta === 'editada') {
         this.mostrarAlerta(
-          `¡Los cambios de la semilla "${nombre}" se guardaron correctamente !`,
+          `¡Los cambios de la semilla "${nombre}" se guardaron correctamente!`,
           'edicion'
         );
       }
@@ -128,6 +140,47 @@ export class SemillaListComponent implements OnInit {
 
     this.normalizarTemporadasEnCarrito();
     this.cargarSemillas();
+    if (this.esModoAdmin()) {
+      this.cargarCatalogoTablaBD();
+    }
+  }
+
+  irATablaCatalogoBD(): void {
+    this.esVistaTablaCatalogo.set(true);
+    this.router.navigate(['/admin/panel/catalogo']);
+    this.cargarCatalogoTablaBD();
+  }
+
+  volverAFichasAdmin(): void {
+    this.esVistaTablaCatalogo.set(false);
+    this.router.navigate(['/admin/panel']);
+    this.cargarSemillas();
+  }
+
+  cargarCatalogoTablaBD(): void {
+    this.cargandoTablaBD.set(true);
+    this.mensajeError.set('');
+
+    this.semillaService
+      .obtenerCatalogoAdmin()
+      .pipe(
+        timeout({ first: 10000 }),
+        finalize(() => {
+          this.cargandoTablaBD.set(false);
+        })
+      )
+      .subscribe({
+        next: (semillas) => {
+          const enriquecidas = semillas.map(s => this.enriquecerFicha(s));
+          this.tablaCatalogoBD.set(enriquecidas);
+        },
+        error: (err) => {
+          console.error('Error al cargar listado de semillas:', err);
+          this.mensajeError.set(
+            'No se pudo obtener el listado de semillas. Intentá nuevamente.'
+          );
+        }
+      });
   }
 
   mostrarAlerta(mensaje: string, tipo: 'exito' | 'edicion' | 'eliminada'): void {
@@ -150,39 +203,38 @@ export class SemillaListComponent implements OnInit {
   seleccionarCultivo(codigo: string): void {
     this.cultivoFiltro.set(codigo);
 
-    // En la vista pública del cliente, actualiza la URL a /semilla/maiz, /semilla/soja, etc.
     if (!this.esModoAdmin()) {
       if (codigo === 'TODOS') {
         this.router.navigate(['/']);
       } else {
-        const slug = CULTIVO_A_SLUG[codigo] || codigo.toLowerCase();
-        this.router.navigate(['/semilla', slug]);
+        const rutaCultivo = CULTIVO_A_RUTA[codigo] || codigo.toLowerCase();
+        this.router.navigate(['/semilla', rutaCultivo]);
       }
     }
   }
 
   cargarSemillas(): void {
-    this.loading.set(true);
-    this.errorMessage.set('');
+    this.cargando.set(true);
+    this.mensajeError.set('');
 
     this.semillaService
-      .getSemillas()
+      .obtenerSemillas()
       .pipe(
         timeout({ first: 10000 }),
         finalize(() => {
-          this.loading.set(false);
+          this.cargando.set(false);
         })
       )
       .subscribe({
         next: (semillas) => {
           const enriquecidas = semillas.map(s => this.enriquecerFicha(s));
-          this.dataSource.set(enriquecidas);
+          this.listaSemillas.set(enriquecidas);
           this.normalizarTemporadasEnCarrito();
         },
         error: (err) => {
           console.error('Error al cargar semillas:', err);
-          this.errorMessage.set(
-            'No se pudo conectar con el servidor de AgroEco. Verificá que la API esté corriendo en el puerto 3000.'
+          this.mensajeError.set(
+            'No se pudo cargar el catálogo de semillas. Intentá nuevamente.'
           );
         }
       });
@@ -195,7 +247,7 @@ export class SemillaListComponent implements OnInit {
       temporadasDisponibles:
         semilla.temporadasDisponibles && semilla.temporadasDisponibles.length >= 2
           ? semilla.temporadasDisponibles
-          : TEMPORADAS_DISPONIBLES_DEFAULT
+          : TEMPORADAS_DISPONIBLES_POR_DEFECTO
     };
 
     const existente = this.cotizacionService
@@ -207,7 +259,7 @@ export class SemillaListComponent implements OnInit {
       (!existente.semilla.temporadasDisponibles || existente.semilla.temporadasDisponibles.length < 2)
     ) {
       const hectareasPrevias = Number(existente.hectareas) || 0;
-      const temporadaPrevia = existente.temporada || TEMPORADAS_DISPONIBLES_DEFAULT[0];
+      const temporadaPrevia = existente.temporada || TEMPORADAS_DISPONIBLES_POR_DEFECTO[0];
       this.cotizacionService.removeItem(Number(semillaConTemporadas.id));
       this.cotizacionService.addItem(semillaConTemporadas, hectareasPrevias + 50, temporadaPrevia);
     } else {
@@ -218,8 +270,8 @@ export class SemillaListComponent implements OnInit {
   }
 
   eliminarSemilla(semilla: FichaSemillaExtendida): void {
-    const idStr = String(semilla.id);
-    if (this.deletingIds().has(idStr)) return;
+    const idTexto = String(semilla.id);
+    if (this.idsEliminando().has(idTexto)) return;
 
     const confirmado = window.confirm(
       `¿Seguro que querés eliminar la semilla "${semilla.nombre}"?`
@@ -228,24 +280,25 @@ export class SemillaListComponent implements OnInit {
       return;
     }
 
-    this.deletingIds.update(ids => new Set(ids).add(idStr));
+    this.idsEliminando.update(ids => new Set(ids).add(idTexto));
 
     this.semillaService
-      .deleteSemilla(idStr)
+      .eliminarSemilla(idTexto)
       .pipe(
         finalize(() =>
-          this.deletingIds.update(ids => {
+          this.idsEliminando.update(ids => {
             const restantes = new Set(ids);
-            restantes.delete(idStr);
+            restantes.delete(idTexto);
             return restantes;
           })
         )
       )
       .subscribe({
         next: () => {
-          this.dataSource.update(semillas =>
-            semillas.filter(item => String(item.id) !== idStr)
+          this.listaSemillas.update(semillas =>
+            semillas.filter(item => String(item.id) !== idTexto)
           );
+          this.cargarCatalogoTablaBD();
           this.mostrarAlerta(
             `¡La semilla "${semilla.nombre}" fue eliminada correctamente!`,
             'eliminada'
@@ -254,14 +307,14 @@ export class SemillaListComponent implements OnInit {
         error: (err) => {
           console.error('Error al eliminar semilla:', err);
           this.mostrarAlerta(
-            `No se pudo eliminar la semilla "${semilla.nombre}". Intenta nuevamente.`,
+            `No se pudo eliminar la semilla "${semilla.nombre}". Intentá nuevamente.`,
             'eliminada'
           );
         }
       });
   }
 
-  estrellasArray(puntos: number): boolean[] {
+  arregloEstrellas(puntos: number): boolean[] {
     return [1, 2, 3, 4, 5].map(i => i <= puntos);
   }
 
@@ -271,10 +324,10 @@ export class SemillaListComponent implements OnInit {
       if (!item.semilla.temporadasDisponibles || item.semilla.temporadasDisponibles.length < 2) {
         const semillaNormalizada: Semilla = {
           ...item.semilla,
-          temporadasDisponibles: TEMPORADAS_DISPONIBLES_DEFAULT
+          temporadasDisponibles: TEMPORADAS_DISPONIBLES_POR_DEFECTO
         };
         const ha = Number(item.hectareas) || 50;
-        const temp = item.temporada || TEMPORADAS_DISPONIBLES_DEFAULT[0];
+        const temp = item.temporada || TEMPORADAS_DISPONIBLES_POR_DEFECTO[0];
         this.cotizacionService.removeItem(item.semillaId);
         this.cotizacionService.addItem(semillaNormalizada, ha, temp);
       }
@@ -282,7 +335,7 @@ export class SemillaListComponent implements OnInit {
   }
 
   private enriquecerFicha(s: Semilla): FichaSemillaExtendida {
-    const nombreUpper = (s.nombre || '').toUpperCase();
+    const nombreMayusculas = (s.nombre || '').toUpperCase();
     const mapaCultivo: Record<number, string> = {
       1: 'Soja',
       2: 'Maíz',
@@ -296,16 +349,16 @@ export class SemillaListComponent implements OnInit {
       '';
 
     if (!cultivoNombre) {
-      if (nombreUpper.includes('TRIGO')) cultivoNombre = 'Trigo';
-      else if (nombreUpper.includes('GIRASOL') || nombreUpper.includes('5710')) cultivoNombre = 'Girasol';
-      else if (nombreUpper.includes('SOJA') || nombreUpper.includes('DM')) cultivoNombre = 'Soja';
+      if (nombreMayusculas.includes('TRIGO')) cultivoNombre = 'Trigo';
+      else if (nombreMayusculas.includes('GIRASOL') || nombreMayusculas.includes('5710')) cultivoNombre = 'Girasol';
+      else if (nombreMayusculas.includes('SOJA') || nombreMayusculas.includes('DM')) cultivoNombre = 'Soja';
       else cultivoNombre = 'Maíz';
     }
 
     const temporadasDisponibles =
       s.temporadasDisponibles && s.temporadasDisponibles.length >= 2
         ? s.temporadasDisponibles
-        : TEMPORADAS_DISPONIBLES_DEFAULT;
+        : TEMPORADAS_DISPONIBLES_POR_DEFECTO;
 
     const rindePersonalizado =
       s.rendimiento_estimado !== undefined && s.rendimiento_estimado !== null
@@ -326,7 +379,7 @@ export class SemillaListComponent implements OnInit {
         zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'Limagrain (LG Semillas) · Tecnología Clearfield® (BASF)',
         origenLicencia: 'Semillero Oficial Fiscalizado — Guarda en Cámara Fría Incluida',
-        tecnologiaBadge: s.tecnologia || 'Clearfield CL',
+        insigniaTecnologia: s.tecnologia || 'Clearfield CL',
         cruzamientoFicha: s.cruzamiento || (s.tipo === 'COMUN' ? 'Variedad Polinización Abierta' : 'Simple'),
         cicloFicha: cicloTexto,
         madurezFicha: s.madurez_relativa || '108',
@@ -355,7 +408,7 @@ export class SemillaListComponent implements OnInit {
         zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'Limagrain / Buck Semillas — Red Líder AgroEco',
         origenLicencia: 'Variedad Fiscalizada con Seguro de Resiembra',
-        tecnologiaBadge: s.tecnologia || (s.ciclo === 'Largo' ? 'Grupo Calidad 1 · Heladas' : 'Alto Potencial Sanitario'),
+        insigniaTecnologia: s.tecnologia || (s.ciclo === 'Largo' ? 'Grupo Calidad 1 · Heladas' : 'Alto Potencial Sanitario'),
         cruzamientoFicha: s.cruzamiento || 'Autógama Purificada',
         cicloFicha: cicloTexto,
         madurezFicha: s.madurez_relativa || (s.ciclo === 'Largo' ? '142' : '118'),
@@ -385,7 +438,7 @@ export class SemillaListComponent implements OnInit {
         zonasAdaptacion: s.zonasAdaptacion?.length ? s.zonasAdaptacion : zonas,
         empresaElaboradora: 'DonMario (GDM) / Nidera Semillas',
         origenLicencia: 'Multiplicador Oficial AgroEco',
-        tecnologiaBadge: s.tecnologia || 'Enlist E3 / STS',
+        insigniaTecnologia: s.tecnologia || 'Enlist E3 / STS',
         cruzamientoFicha: s.cruzamiento || 'Variedad Grupo IV Medio',
         cicloFicha: cicloTexto,
         madurezFicha: s.madurez_relativa || 'GM 4.6',
@@ -404,8 +457,7 @@ export class SemillaListComponent implements OnInit {
       };
     }
 
-    // Por defecto: Maíz (estilo LG 30646 / LG 30849)
-    const esDekalb = nombreUpper.includes('DK');
+    const esDekalb = nombreMayusculas.includes('DK');
     const zonas = ['Zona Núcleo', 'Centro y Sur de Santa Fe', 'Córdoba', 'Entre Ríos', 'Buenos Aires', 'La Pampa'];
     return {
       ...s,
@@ -417,7 +469,7 @@ export class SemillaListComponent implements OnInit {
         ? 'Dekalb (Bayer CropScience) · Distribuidor Oficial AgroEco'
         : 'Limagrain (LG Semillas · 60 años) · Semillero Oficial',
       origenLicencia: 'Seguro de Resiembra 100% + Guarda en Cámara Fría sin costo',
-      tecnologiaBadge: s.tecnologia || (esDekalb ? 'VT Triple PRO (VT3P)' : 'VIP3'),
+      insigniaTecnologia: s.tecnologia || (esDekalb ? 'VT Triple PRO (VT3P)' : 'VIP3'),
       cruzamientoFicha: s.cruzamiento || (s.tipo === 'COMUN' ? 'Variedad Abierta' : 'Simple'),
       cicloFicha: cicloTexto,
       madurezFicha: s.madurez_relativa || '120',
@@ -437,4 +489,3 @@ export class SemillaListComponent implements OnInit {
     };
   }
 }
-
