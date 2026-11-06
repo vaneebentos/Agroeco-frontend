@@ -549,3 +549,168 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* BARRA DE ADMINISTRACIÓN Y TABLA DE CATÁLOGO BD (/admin/panel y /admin/panel/catalogo) */
+.admin-panel-toolbar {
+  background: #ffffff;
+  border: 2px solid #1b4332;
+  border-radius: 16px;
+  padding: 1.1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-badge {
+  display: inline-block;
+  background: #1b4332;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+.admin-toolbar-info h2 {
+  margin: 0.35rem 0 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.admin-toolbar-actions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.btn-admin-new,
+.btn-admin-table,
+.btn-admin-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.86rem;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-admin-new {
+  background: #15803d;
+  color: #ffffff;
+}
+
+.btn-admin-table {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.btn-admin-back {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.admin-db-table-section {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.1rem;
+}
+
+.admin-db-header h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.admin-db-header p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.table-responsive-box {
+  overflow-x: auto;
+}
+
+.agro-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.agro-admin-table th,
+.agro-admin-table td {
+  padding: 0.75rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.agro-admin-table th {
+  background: #f8fafc;
+  font-weight: 800;
+  color: #1e293b;
+  text-transform: uppercase;
+  font-size: 0.76rem;
+}
+
+.agro-admin-table tr.row-eliminada {
+  background: #fff1f2;
+  color: #881337;
+}
+
+.badge-origen {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-origen.nueva {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-estado-bd {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.badge-estado-bd.activa {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.badge-estado-bd.eliminada {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.table-actions-cell {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}

@@ -10,12 +10,13 @@ import { CotizacionComponent } from './features/cotizacion/cotizacion.component'
 
 export const routes: Routes = [
   // Vista pública de semillas
-  { path: '', redirectTo: '/semillas', pathMatch: 'full' },
+  { path: '', component: SemillaListComponent },
   { path: 'semillas', component: SemillaListComponent },
   { path: 'semilla/:cultivo', component: SemillaListComponent },
 
   // Administración de semillas
   { path: 'admin/panel', component: SemillaListComponent },
+  { path: 'admin/panel/catalogo', component: SemillaListComponent },
   { path: 'admin/panel/new', component: SemillaFormComponent },
   { path: 'admin/panel/:id/edit', component: SemillaFormComponent },
 
@@ -26,5 +27,5 @@ export const routes: Routes = [
   // Cotización
   { path: 'cotizacion', component: CotizacionComponent },
 
-  { path: '**', redirectTo: '/semillas' },
+  { path: '**', redirectTo: '' },
 ];

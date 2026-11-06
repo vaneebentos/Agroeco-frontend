@@ -17,8 +17,105 @@
     <button class="alert-close-btn" (click)="cerrarAlerta()" title="Cerrar aviso">✕</button>
   </div>
 
-  <!-- 1. BANNER CAMPAÑA + BENEFICIOS (Inspirado en LG Campaña 2025 + Lehmann) -->
-  <section class="campaign-banner">
+  <!-- BARRA DE ADMINISTRACIÓN (Solo visible en /admin/panel y /admin/panel/catalogo) -->
+  <section *ngIf="esModoAdmin()" class="admin-panel-toolbar">
+    <div class="admin-toolbar-info">
+      <span class="admin-badge">PANEL DE ADMINISTRACIÓN</span>
+      <h2>{{ esVistaTablaCatalogo() ? 'Listado de semillas' : 'Gestión de semillas' }}</h2>
+    </div>
+    <div class="admin-toolbar-actions">
+      <a routerLink="/admin/panel/new" class="btn-admin-new">
+        <span class="material-symbols-outlined notranslate" translate="no">add_circle</span>
+        Nueva Semilla
+      </a>
+
+      <button
+        *ngIf="!esVistaTablaCatalogo()"
+        type="button"
+        class="btn-admin-table"
+        (click)="irATablaCatalogoBD()">
+        <span class="material-symbols-outlined notranslate" translate="no">table_view</span>
+        Listado de semillas
+      </button>
+
+      <button
+        *ngIf="esVistaTablaCatalogo()"
+        type="button"
+        class="btn-admin-back"
+        (click)="volverAFichasAdmin()">
+        <span class="material-symbols-outlined notranslate" translate="no">grid_view</span>
+        Ver Fichas Técnicas
+      </button>
+    </div>
+  </section>
+
+  <!-- VISTA LISTADO DE SEMILLAS (/admin/panel/catalogo) -->
+  <section *ngIf="esModoAdmin() && esVistaTablaCatalogo()" class="admin-db-table-section">
+    <div class="admin-db-header">
+      <div>
+        <h2>Listado de semillas</h2>
+        <p>
+          Activas: <strong>{{ semillasActivasBD().length }}</strong> ·
+          Eliminadas: <strong>{{ semillasEliminadasBD().length }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="cargandoTablaBD()" class="state-panel">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Cargando listado de semillas…</span>
+    </div>
+
+    <div *ngIf="!cargandoTablaBD() && tablaCatalogoBD().length > 0" class="table-responsive-box">
+      <table class="agro-admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Cultivo</th>
+            <th>Tipo / Ciclo</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of tablaCatalogoBD()" [class.row-eliminada]="item.eliminado">
+            <td><strong>#{{ item.id }}</strong></td>
+            <td><code>{{ item.codigo || ('AGRO-' + item.id) }}</code></td>
+            <td><strong>{{ item.nombre }}</strong></td>
+            <td>{{ item.cultivoNombre }}</td>
+            <td>{{ item.tipo || 'HIBRIDA' }} · {{ item.cicloFicha }}</td>
+            <td>{{ item.stock ?? 0 }} bolsas</td>
+            <td>
+              <span class="badge-estado-bd" [class.eliminada]="item.eliminado" [class.activa]="!item.eliminado">
+                {{ item.eliminado ? 'Eliminada' : 'Activa' }}
+              </span>
+            </td>
+            <td class="table-actions-cell">
+              <a
+                [routerLink]="['/admin/panel', item.id, 'edit']"
+                class="btn-edit-seed">
+                Editar
+              </a>
+              <button
+                *ngIf="!item.eliminado"
+                type="button"
+                class="btn-delete-seed"
+                [disabled]="idsEliminando().has('' + item.id)"
+                (click)="eliminarSemilla(item)">
+                {{ idsEliminando().has('' + item.id) ? 'Eliminando…' : 'Eliminar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 1. BANNER CAMPAÑA + BENEFICIOS -->
+  <section *ngIf="!esVistaTablaCatalogo()" class="campaign-banner">
     <div class="banner-left">
       <span class="campaign-pill">CAMPAÑA 2025 / 2026 · SEMILLERO OFICIAL</span>
       <h1>Catálogo Técnico de Semillas &amp; Genética Aplicada</h1>
@@ -37,19 +134,12 @@
         </div>
       </div>
     </div>
-
-    <div class="banner-right">
-      <button class="btn-refresh-catalog" (click)="cargarSemillas()" [disabled]="loading()">
-        <span class="material-symbols-outlined notranslate" translate="no">refresh</span>
-        Actualizar desde Base de Datos ({{ dataSource().length }})
-      </button>
-    </div>
   </section>
 
-  <!-- 2. TARJETAS DE ACCESO POR CULTIVO (Navegan a /semilla/maiz, /semilla/girasol, /semilla/trigo, /semilla/soja) -->
-  <section class="lehmann-categories">
+  <!-- 2. TARJETAS DE ACCESO POR CULTIVO -->
+  <section *ngIf="!esVistaTablaCatalogo()" class="lehmann-categories">
     <button
-      *ngFor="let cat of categoriasLehmann"
+      *ngFor="let cat of categoriasCatalogo"
       class="lehmann-cat-card"
       [class.selected]="cultivoFiltro() === cat.codigo"
       (click)="seleccionarCultivo(cat.codigo)">
@@ -64,25 +154,25 @@
   </section>
 
   <!-- 3. ESTADOS DE CARGA / ERROR / VACÍO -->
-  <div *ngIf="loading()" class="state-panel">
+  <div *ngIf="!esVistaTablaCatalogo() && cargando()" class="state-panel">
     <mat-spinner diameter="44"></mat-spinner>
-    <span>Cargando fichas técnicas de semillas desde AgroEco_API…</span>
+    <span>Cargando fichas técnicas de semillas…</span>
   </div>
 
-  <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel">
+  <div *ngIf="!cargando() && mensajeError()" class="state-panel error-panel">
     <mat-icon class="icon-error notranslate" translate="no">error_outline</mat-icon>
-    <span>{{ errorMessage() }}</span>
-    <button mat-flat-button color="primary" (click)="cargarSemillas()">Reintentar conexión</button>
+    <span>{{ mensajeError() }}</span>
+    <button mat-flat-button color="primary" (click)="cargarSemillas()">Reintentar</button>
   </div>
 
-  <div *ngIf="!loading() && !errorMessage() && semillasFiltradas().length === 0" class="state-panel">
+  <div *ngIf="!esVistaTablaCatalogo() && !cargando() && !mensajeError() && semillasFiltradas().length === 0" class="state-panel">
     <mat-icon class="notranslate" translate="no">inventory_2</mat-icon>
     <span>No hay semillas registradas para el filtro seleccionado.</span>
     <button mat-stroked-button (click)="seleccionarCultivo('TODOS')">Ver todos los cultivos</button>
   </div>
 
   <!-- 4. GRILLA DE FICHAS TÉCNICAS EN TARJETAS ORDENADAS -->
-  <section *ngIf="!loading() && !errorMessage() && semillasFiltradas().length > 0" class="seeds-cards-grid">
+  <section *ngIf="!esVistaTablaCatalogo() && !cargando() && !mensajeError() && semillasFiltradas().length > 0" class="seeds-cards-grid">
 
     <article class="seed-product-card" *ngFor="let semilla of semillasFiltradas()">
 
@@ -91,7 +181,7 @@
         <div class="seed-title-block">
           <div class="seed-badges-line">
             <span class="crop-tag">{{ semilla.cultivoNombre }}</span>
-            <span class="tech-tag">Tecnologías disponibles {{ semilla.tecnologiaBadge }}</span>
+            <span class="tech-tag">Tecnologías disponibles {{ semilla.insigniaTecnologia }}</span>
             <span class="cycle-tag" [ngClass]="(semilla.ciclo || 'medio').toLowerCase()">
               Ciclo {{ semilla.cicloFicha }}
             </span>
@@ -106,7 +196,6 @@
             <small class="seed-db-id">{{ semilla.codigo || ('Código #' + semilla.id) }}</small>
           </h2>
 
-          <!-- Empresa que elaboró el producto -->
           <div class="elaborador-box">
             <span class="material-symbols-outlined notranslate" translate="no">domain_verification</span>
             <div>
@@ -135,17 +224,17 @@
             <button
               type="button"
               class="btn-delete-seed"
-              [disabled]="deletingIds().has('' + semilla.id)"
+              [disabled]="idsEliminando().has('' + semilla.id)"
               (click)="eliminarSemilla(semilla)"
               title="Eliminar semilla">
               <span class="material-symbols-outlined notranslate" translate="no">delete</span>
-              {{ deletingIds().has('' + semilla.id) ? 'Eliminando…' : 'Eliminar' }}
+              {{ idsEliminando().has('' + semilla.id) ? 'Eliminando…' : 'Eliminar' }}
             </button>
           </ng-container>
         </div>
       </header>
 
-      <!-- Resumen descriptivo de la base de datos -->
+      <!-- Resumen descriptivo -->
       <p class="seed-summary-text">
         <ng-container *ngIf="semilla.descripcion">{{ semilla.descripcion }} </ng-container>
         <ng-container *ngIf="semilla.caracteristicas">{{ semilla.caracteristicas }}</ng-container>
@@ -154,10 +243,10 @@
         </ng-container>
       </p>
 
-      <!-- B. Las 3 sub-tarjetas internas ordenadas (Características + Sanidad + Dónde se adapta) -->
+      <!-- B. Las 3 sub-tarjetas internas ordenadas -->
       <div class="seed-inner-cards">
 
-        <!-- Sub-tarjeta 1: Características Agronómicas (Editables por cada semilla) -->
+        <!-- Sub-tarjeta 1: Características Agronómicas -->
         <div class="inner-box agro-box">
           <h3>
             <span class="material-symbols-outlined notranslate" translate="no">analytics</span>
@@ -199,7 +288,7 @@
           </div>
         </div>
 
-        <!-- Sub-tarjeta 2: Comportamiento Sanitario (Editable por cada semilla) -->
+        <!-- Sub-tarjeta 2: Comportamiento Sanitario -->
         <div class="inner-box health-box">
           <h3>
             <span class="material-symbols-outlined notranslate" translate="no">shield_with_heart</span>
@@ -210,7 +299,7 @@
               <span class="sanidad-name">{{ item.nombre }}:</span>
               <span class="stars-row" [title]="item.puntos + ' de 5'">
                 <span
-                  *ngFor="let llena of estrellasArray(item.puntos)"
+                  *ngFor="let llena of arregloEstrellas(item.puntos)"
                   class="star"
                   [class.filled]="llena">★</span>
               </span>
@@ -218,7 +307,7 @@
           </ul>
         </div>
 
-        <!-- Sub-tarjeta 3: Dónde se adapta la semilla (Zonas de mayor adaptación) -->
+        <!-- Sub-tarjeta 3: Dónde se adapta la semilla -->
         <div class="inner-box zones-box">
           <h3>
             <span class="material-symbols-outlined notranslate" translate="no">location_on</span>

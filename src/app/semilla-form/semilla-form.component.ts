@@ -13,9 +13,9 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { SemillaService } from '../shared/semilla.service';
-import { SanidadItem, TipoCiclo } from '../shared/models/semilla.model';
+import { ItemSanidad, TipoCiclo } from '../shared/models/semilla.model';
 
-const SANIDAD_POR_CULTIVO: Record<number, SanidadItem[]> = {
+const SANIDAD_POR_CULTIVO: Record<number, ItemSanidad[]> = {
   1: [
     { nombre: 'Tolerancia a Mancha Ojo de Rana (MOR)', puntos: 5 },
     { nombre: 'Tolerancia a Phytophthora', puntos: 4 },
@@ -64,13 +64,13 @@ const SANIDAD_POR_CULTIVO: Record<number, SanidadItem[]> = {
   styleUrl: './semilla-form.component.css',
 })
 export class SemillaFormComponent implements OnInit {
-  private readonly formBuilder = inject(FormBuilder);
+  private readonly constructorFormulario = inject(FormBuilder);
   readonly semillaId = signal<string | null>(null);
-  readonly loading = signal(false);
-  readonly loadFailed = signal(false);
-  readonly isEditing = computed(() => this.semillaId() !== null);
-  readonly saving = signal(false);
-  readonly errorMessage = signal('');
+  readonly cargando = signal(false);
+  readonly errorCarga = signal(false);
+  readonly esEdicion = computed(() => this.semillaId() !== null);
+  readonly guardando = signal(false);
+  readonly mensajeError = signal('');
 
   readonly cultivosOpciones = [
     { id: 1, nombre: 'Soja' },
@@ -93,7 +93,7 @@ export class SemillaFormComponent implements OnInit {
     { valor: 1, etiqueta: '1 ★☆☆☆☆ (Baja)' },
   ];
 
-  readonly form = this.formBuilder.nonNullable.group({
+  readonly formulario = this.constructorFormulario.nonNullable.group({
     codigo: ['AGRO-001', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(100)]],
     nombre: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(255)]],
     cultivo_id: [2, [Validators.required]],
@@ -112,11 +112,11 @@ export class SemillaFormComponent implements OnInit {
     descripcion: ['Estabilidad y potencial en todos los ambientes.'],
     caracteristicas: [''],
     activo: [true],
-    sanidad: this.formBuilder.array<FormGroup>([]),
+    sanidad: this.constructorFormulario.array<FormGroup>([]),
   });
 
-  get sanidadFormArray(): FormArray<FormGroup> {
-    return this.form.controls.sanidad;
+  get arregloSanidad(): FormArray<FormGroup> {
+    return this.formulario.controls.sanidad;
   }
 
   constructor(
@@ -130,58 +130,58 @@ export class SemillaFormComponent implements OnInit {
     this.semillaId.set(id);
 
     if (id) {
-      this.loadSemilla(id);
+      this.cargarSemilla(id);
     } else {
       const sugerido = `LG-${Math.floor(30000 + Math.random() * 999)}`;
-      this.form.controls.codigo.setValue(sugerido);
+      this.formulario.controls.codigo.setValue(sugerido);
       this.cargarSanidadInicial(SANIDAD_POR_CULTIVO[2]);
     }
   }
 
-  onCultivoChange(cultivoId: number): void {
-    if (!this.isEditing()) {
+  alCambiarCultivo(cultivoId: number): void {
+    if (!this.esEdicion()) {
       const plantilla = SANIDAD_POR_CULTIVO[cultivoId] || SANIDAD_POR_CULTIVO[2];
       this.cargarSanidadInicial(plantilla);
     }
   }
 
-  private crearSanidadGroup(item: SanidadItem): FormGroup {
-    return this.formBuilder.nonNullable.group({
+  private crearGrupoSanidad(item: ItemSanidad): FormGroup {
+    return this.constructorFormulario.nonNullable.group({
       nombre: [item.nombre, [Validators.required]],
       puntos: [Number(item.puntos) || 4, [Validators.required, Validators.min(1), Validators.max(5)]],
     });
   }
 
-  private cargarSanidadInicial(items: SanidadItem[]): void {
-    this.sanidadFormArray.clear();
+  private cargarSanidadInicial(items: ItemSanidad[]): void {
+    this.arregloSanidad.clear();
     for (const item of items) {
-      this.sanidadFormArray.push(this.crearSanidadGroup(item));
+      this.arregloSanidad.push(this.crearGrupoSanidad(item));
     }
   }
 
   agregarItemSanidad(): void {
-    this.sanidadFormArray.push(
-      this.crearSanidadGroup({ nombre: 'Nueva tolerancia sanitaria', puntos: 4 })
+    this.arregloSanidad.push(
+      this.crearGrupoSanidad({ nombre: 'Nueva tolerancia sanitaria', puntos: 4 })
     );
   }
 
-  eliminarItemSanidad(index: number): void {
-    if (this.sanidadFormArray.length > 1) {
-      this.sanidadFormArray.removeAt(index);
+  eliminarItemSanidad(indice: number): void {
+    if (this.arregloSanidad.length > 1) {
+      this.arregloSanidad.removeAt(indice);
     }
   }
 
-  private loadSemilla(id: string): void {
-    this.loading.set(true);
-    this.errorMessage.set('');
+  private cargarSemilla(id: string): void {
+    this.cargando.set(true);
+    this.mensajeError.set('');
 
     this.semillaService
-      .getSemillaById(id)
-      .pipe(finalize(() => this.loading.set(false)))
+      .obtenerSemillaPorId(id)
+      .pipe(finalize(() => this.cargando.set(false)))
       .subscribe({
         next: (semilla) => {
           const cultivoId = Number(semilla.cultivo_id) || 2;
-          this.form.patchValue({
+          this.formulario.patchValue({
             codigo: semilla.codigo ?? `AGRO-${semilla.id}`,
             nombre: semilla.nombre,
             cultivo_id: cultivoId,
@@ -212,50 +212,52 @@ export class SemillaFormComponent implements OnInit {
           this.cargarSanidadInicial(sanidadActual);
         },
         error: () => {
-          this.loadFailed.set(true);
-          this.errorMessage.set('No se pudo cargar la semilla solicitada desde el servidor.');
+          this.errorCarga.set(true);
+          this.mensajeError.set('No se pudo cargar la semilla solicitada desde el servidor.');
         },
       });
   }
 
-  submit(): void {
-    if (this.saving() || this.loading() || this.loadFailed()) return;
+  guardarSemilla(): void {
+    if (this.guardando() || this.cargando() || this.errorCarga()) return;
 
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+    if (this.formulario.invalid) {
+      this.formulario.markAllAsTouched();
       return;
     }
 
     const id = this.semillaId();
-    const raw = this.form.getRawValue();
-    const payload = {
-      ...raw,
-      sanidad: raw.sanidad.map((item: any) => ({
+    const datosFormulario = this.formulario.getRawValue();
+    const categoria = datosFormulario.categoria === 'SEGUNDA' ? 'SEGUNDA' : 'PRIMERA';
+    const datosEnvio = {
+      ...datosFormulario,
+      categoria: categoria as 'PRIMERA' | 'SEGUNDA',
+      sanidad: datosFormulario.sanidad.map((item: any) => ({
         nombre: String(item.nombre || '').trim(),
         puntos: Number(item.puntos) || 4,
       })),
     };
 
-    this.saving.set(true);
-    this.errorMessage.set('');
+    this.guardando.set(true);
+    this.mensajeError.set('');
 
-    const request$ = id
-      ? this.semillaService.updateSemilla(id, payload)
-      : this.semillaService.createSemilla(payload);
+    const peticion$ = id
+      ? this.semillaService.actualizarSemilla(id, datosEnvio)
+      : this.semillaService.crearSemilla(datosEnvio);
 
-    request$.pipe(finalize(() => this.saving.set(false))).subscribe({
+    peticion$.pipe(finalize(() => this.guardando.set(false))).subscribe({
       next: (semillaGuardada) => {
         this.router.navigate(['/admin/panel'], {
           queryParams: {
             alerta: id ? 'editada' : 'creada',
-            nombre: semillaGuardada?.nombre || payload.nombre,
+            nombre: semillaGuardada?.nombre || datosEnvio.nombre,
           },
         });
       },
       error: (err) => {
-        const backendError = err?.error?.error || err?.error?.message || '';
-        this.errorMessage.set(
-          `No se pudo ${id ? 'actualizar' : 'crear'} la semilla en el servidor. ${backendError || 'Revisa los datos e intenta nuevamente.'}`,
+        const errorServidor = err?.error?.error || err?.error?.message || '';
+        this.mensajeError.set(
+          `No se pudo ${id ? 'actualizar' : 'crear'} la semilla en el servidor. ${errorServidor || 'Revisá los datos e intentá nuevamente.'}`,
         );
       },
     });
