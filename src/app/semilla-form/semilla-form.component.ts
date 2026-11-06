@@ -228,8 +228,10 @@ export class SemillaFormComponent implements OnInit {
 
     const id = this.semillaId();
     const datosFormulario = this.formulario.getRawValue();
+    const categoria = datosFormulario.categoria === 'SEGUNDA' ? 'SEGUNDA' : 'PRIMERA';
     const datosEnvio = {
       ...datosFormulario,
+      categoria: categoria as 'PRIMERA' | 'SEGUNDA',
       sanidad: datosFormulario.sanidad.map((item: any) => ({
         nombre: String(item.nombre || '').trim(),
         puntos: Number(item.puntos) || 4,
