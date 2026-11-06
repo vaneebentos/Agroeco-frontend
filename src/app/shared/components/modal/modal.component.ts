@@ -9,12 +9,12 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 })
 export class ModalComponent {
 
-  @Input() titulo: string = '';
-  @Input() abierto: boolean = false;
+  @Input() title: string = '';
+  @Input() open: boolean = false;
 
-  @Output() cerrar = new EventEmitter<void>();
+  @Output() close = new EventEmitter<void>();
 
-  cerrarModal(): void {
-    this.cerrar.emit();
+  closeModal(): void {
+    this.close.emit();
   }
 }

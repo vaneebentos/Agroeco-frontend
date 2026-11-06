@@ -7,8 +7,8 @@
       <span class="brand-text">AgroEco</span>
     </a>
 
-    <!-- ACCIONES EN VISTA CLIENTE -->
-    <div class="actions" *ngIf="!esModoAdmin">
+    <!-- CUSTOMER VIEW ACTIONS -->
+    <div class="actions" *ngIf="!isAdminMode">
       <button class="icon-btn text-size-btn" (click)="toggleLargeText()"
         [title]="isLargeText ? 'Tamaño de letra normal' : 'Aumentar tamaño de letra'">
         T
@@ -22,15 +22,16 @@
       <a routerLink="/cotizacion" class="cotizar-btn">
         <span class="material-symbols-outlined cart-icon notranslate" translate="no">shopping_cart</span>
         <span class="btn-text">Pedir cotización</span>
-        <span class="cart-badge" *ngIf="cotizacionService.count() > 0">{{ cotizacionService.count() }}</span>
+        <span class="cart-badge" *ngIf="quoteService.count() > 0">{{ quoteService.count() }}</span>
       </a>
     </div>
 
-    <!-- ACCIONES EN VISTA ADMIN (/admin/panel) -->
-    <div class="actions" *ngIf="esModoAdmin">
-      <a routerLink="/admin/panel/new" class="header-admin-new-btn">
-        <span class="material-symbols-outlined notranslate" translate="no">add_circle</span>
-        <span>+ Nueva Semilla</span>
+
+    <!-- ADMIN VIEW ACTIONS (/admin/panel) -->
+    <div class="actions" *ngIf="isAdminMode">
+      <a routerLink="/admin/panel" class="header-admin-new-btn">
+        <span class="material-symbols-outlined notranslate" translate="no">spa</span>
+        <span>Semillas</span>
       </a>
 
       <a routerLink="/admin/panel/clientes" class="header-admin-new-btn">

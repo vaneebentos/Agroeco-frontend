@@ -1,0 +1,44 @@
+<div class="tabla-container">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th *ngFor="let column of columns">
+          {{ column.title }}
+        </th>
+        <th class="columna-acciones">Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of data">
+        <td *ngFor="let column of columns">
+          {{ row[column.field] || '-' }}
+        </td>
+
+        <td class="acciones">
+          <button
+            type="button"
+            class="btn-accion btn-editar"
+            (click)="edit.emit(row)"
+          >
+            Editar
+          </button>
+
+          <button
+            type="button"
+            class="btn-accion btn-eliminar"
+            (click)="remove.emit(row)"
+          >
+            Eliminar
+          </button>
+        </td>
+      </tr>
+
+      <tr *ngIf="data.length === 0">
+        <td [attr.colspan]="columns.length + 1" class="tabla-vacia">
+          No hay registros para mostrar.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,170 @@
+<div class="cotizacion-page">
+  <div class="container">
+    <!-- Page Header -->
+    <div class="page-title-box">
+      <div class="title-with-icon">
+        <span class="material-symbols-outlined title-icon">shopping_cart</span>
+        <h1>Solicitud de cotización</h1>
+      </div>
+      <p class="subtitle">AgroEco no publica precios: cargá tu pedido por hectárea y te cotizamos por correo.</p>
+    </div>
+
+    <!-- Feedback messages -->
+    <div class="alert-box success-alert" *ngIf="submitSuccess()">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ submitSuccess() }}</span>
+    </div>
+
+    <div class="alert-box error-alert" *ngIf="submitError()">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ submitError() }}</span>
+    </div>
+
+    <!-- Main 2-column layout -->
+    <div class="cotizacion-columns-grid">
+      <!-- Left: product list -->
+      <div class="left-col">
+        <h2 class="section-title">Tu carga de productos</h2>
+
+        <div class="cart-items-list" *ngIf="quoteService.items().length > 0; else emptyCart">
+          <div class="cart-item-card" *ngFor="let item of quoteService.items()">
+            <div class="item-header">
+              <span class="item-name">{{ item.seed.name }}</span>
+              <button 
+                class="trash-btn" 
+                (click)="removeItem(item.seedId)" 
+                title="Eliminar producto">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+
+            <div class="item-fields">
+              <div class="field-group">
+                <label>Hectáreas</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  [ngModel]="item.hectares" 
+                  (ngModelChange)="updateItem(item.seedId, $event, item.season)" 
+                />
+              </div>
+
+              <div class="field-group">
+                <label>Temporada</label>
+                <select 
+                  [ngModel]="item.season" 
+                  (ngModelChange)="updateItem(item.seedId, item.hectares, $event)">
+                  <option *ngFor="let t of item.seed.availableSeasons" [value]="t">{{ t }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Yellow Bar -->
+          <div class="total-bar">
+            <span class="total-text">Total: {{ quoteService.totalHectares() }} ha</span>
+            <button class="vaciar-btn" (click)="clearAll()">Vaciar</button>
+          </div>
+        </div>
+
+        <ng-template #emptyCart>
+          <div class="empty-cart-card">
+            <span class="material-symbols-outlined empty-cart-icon">remove_shopping_cart</span>
+            <p>No tenés productos cargados en tu solicitud de cotización.</p>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
+              <button type="button" class="btn btn-primary" (click)="addSampleSeed()">+ Cargar producto de prueba (Maíz LG 30646)</button>
+              <a routerLink="/semillas" class="btn btn-outline">Ir al catálogo</a>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Right: producer data -->
+      <div class="right-col">
+        <h2 class="section-title">Datos del productor</h2>
+
+        <div class="producer-form-card">
+          <div class="form-row">
+            <label>Nombre y apellido *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formData.fullName" 
+              (input)="errors.fullName = ''"
+              [class.input-error]="errors.fullName"
+              placeholder="Ej: Juan Pérez" 
+            />
+            <span class="field-error-msg" *ngIf="errors.fullName">{{ errors.fullName }}</span>
+          </div>
+
+          <div class="form-row">
+            <label>CUIT *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formData.cuit" 
+              (input)="errors.cuit = ''"
+              [class.input-error]="errors.cuit"
+              placeholder="Ej: 20-12345678-9" 
+              maxlength="13" 
+            />
+            <span class="field-error-msg" *ngIf="errors.cuit">{{ errors.cuit }}</span>
+          </div>
+
+          <div class="form-row">
+            <label>Establecimiento</label>
+            <input type="text" [(ngModel)]="formData.farm" placeholder="Ej: La Esperanza" />
+          </div>
+
+          <div class="form-row">
+            <label>Localidad / Zona</label>
+            <input type="text" [(ngModel)]="formData.locality" placeholder="Ej: Pergamino - Buenos Aires" />
+          </div>
+
+          <div class="form-row">
+            <label>Teléfono</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="formData.phone" 
+              (input)="errors.phone = ''"
+              [class.input-error]="errors.phone"
+              placeholder="Ej: +54 9 2477 123456" 
+            />
+            <span class="field-error-msg" *ngIf="errors.phone">{{ errors.phone }}</span>
+          </div>
+
+          <div class="form-row">
+            <label>Correo *</label>
+            <input 
+              type="email" 
+              [(ngModel)]="formData.email" 
+              (input)="errors.email = ''"
+              [class.input-error]="errors.email"
+              placeholder="Ej: productor@agro.com" 
+            />
+            <span class="field-error-msg" *ngIf="errors.email">{{ errors.email }}</span>
+          </div>
+
+          <div class="form-row">
+            <label>Comentarios</label>
+            <textarea [(ngModel)]="formData.comments" rows="3" placeholder="Aclaraciones sobre tipo de suelo, entrega, etc."></textarea>
+          </div>
+
+          <!-- Message preview -->
+          <div class="preview-box">
+            <span class="preview-title">VISTA PREVIA DEL MENSAJE</span>
+            <pre class="preview-content">{{ previewMessage() }}</pre>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            class="btn btn-primary submit-btn" 
+            [disabled]="isSubmitting()"
+            (click)="submitRequest()">
+            <span class="material-symbols-outlined">mail</span>
+            <span>{{ isSubmitting() ? 'Enviando...' : 'Enviar solicitud por correo' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

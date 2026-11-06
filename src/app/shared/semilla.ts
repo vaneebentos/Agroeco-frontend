@@ -1,1 +1,0 @@
-export * from './models/semilla.model';

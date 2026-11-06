@@ -1,0 +1,18 @@
+@if (customer) {
+  <div class="confirmacion">
+    <h3>Eliminar cliente</h3>
+
+    <p>
+      ¿Estás seguro de que deseas eliminar a
+      <strong>{{ customer.name }}</strong>?
+    </p>
+
+    <button (click)="confirmDeletion()">
+      Confirmar
+    </button>
+
+    <button (click)="cancelDeletion()">
+      Cancelar
+    </button>
+  </div>
+}

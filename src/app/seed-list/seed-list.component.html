@@ -1,0 +1,329 @@
+<main class="agro-catalog-page notranslate" translate="no">
+
+  <!-- NOTIFICATION BANNER (seed created, edited, deleted or added to quote) -->
+  <div
+    *ngIf="alertMessage()"
+    class="agro-alert-banner"
+    [class.alert-exito]="alertType() === 'success'"
+    [class.alert-edicion]="alertType() === 'edit'"
+    [class.alert-eliminada]="alertType() === 'deleted'"
+    role="alert">
+    <div class="alert-left">
+      <span class="material-symbols-outlined notranslate" translate="no">
+        {{ alertType() === 'deleted' ? 'delete_forever' : (alertType() === 'edit' ? 'edit_note' : 'check_circle') }}
+      </span>
+      <strong>{{ alertMessage() }}</strong>
+    </div>
+    <button class="alert-close-btn" (click)="closeAlert()" title="Cerrar aviso">✕</button>
+  </div>
+
+  <!-- ADMIN TOOLBAR (only visible in /admin/panel and /admin/panel/catalogo) -->
+  <section *ngIf="isAdminMode()" class="admin-panel-toolbar">
+    <div class="admin-toolbar-info">
+      <span class="admin-badge">PANEL DE ADMINISTRACIÓN</span>
+      <h2>{{ isCatalogTableView() ? 'Listado de semillas' : 'Gestión de semillas' }}</h2>
+    </div>
+    <div class="admin-toolbar-actions">
+      <a routerLink="/admin/panel/new" class="btn-admin-new">
+        <span class="material-symbols-outlined notranslate" translate="no">add_circle</span>
+        Nueva Semilla
+      </a>
+
+      <button
+        *ngIf="!isCatalogTableView()"
+        type="button"
+        class="btn-admin-table"
+        (click)="goToCatalogTable()">
+        <span class="material-symbols-outlined notranslate" translate="no">table_view</span>
+        Listado de semillas
+      </button>
+
+      <button
+        *ngIf="isCatalogTableView()"
+        type="button"
+        class="btn-admin-back"
+        (click)="backToAdminSheets()">
+        <span class="material-symbols-outlined notranslate" translate="no">grid_view</span>
+        Ver Fichas Técnicas
+      </button>
+    </div>
+  </section>
+
+  <!-- SEED LIST VIEW (/admin/panel/catalogo) -->
+  <section *ngIf="isAdminMode() && isCatalogTableView()" class="admin-db-table-section">
+    <div class="admin-db-header">
+      <div>
+        <h2>Listado de semillas</h2>
+        <p>
+          Activas: <strong>{{ activeCatalogSeeds().length }}</strong> ·
+          Eliminadas: <strong>{{ deletedCatalogSeeds().length }}</strong>
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="loadingTable()" class="state-panel">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Cargando listado de semillas…</span>
+    </div>
+
+    <div *ngIf="!loadingTable() && catalogTable().length > 0" class="table-responsive-box">
+      <table class="agro-admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Cultivo</th>
+            <th>Tipo / Ciclo</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of catalogTable()" [class.row-eliminada]="item.deleted">
+            <td><strong>#{{ item.id }}</strong></td>
+            <td><code>{{ item.code || ('AGRO-' + item.id) }}</code></td>
+            <td><strong>{{ item.name }}</strong></td>
+            <td>{{ item.cropName }}</td>
+            <td>{{ item.type || 'HIBRIDA' }} · {{ item.cycleSheet }}</td>
+            <td>{{ item.stock ?? 0 }} bolsas</td>
+            <td>
+              <span class="badge-estado-bd" [class.eliminada]="item.deleted" [class.activa]="!item.deleted">
+                {{ item.deleted ? 'Eliminada' : 'Activa' }}
+              </span>
+            </td>
+            <td class="table-actions-cell">
+              <a
+                [routerLink]="['/admin/panel', item.id, 'edit']"
+                class="btn-edit-seed">
+                Editar
+              </a>
+              <button
+                *ngIf="!item.deleted"
+                type="button"
+                class="btn-delete-seed"
+                [disabled]="deletingIds().has('' + item.id)"
+                (click)="deleteSeed(item)">
+                {{ deletingIds().has('' + item.id) ? 'Eliminando…' : 'Eliminar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 1. CAMPAIGN BANNER + BENEFITS -->
+  <section *ngIf="!isCatalogTableView()" class="campaign-banner">
+    <div class="banner-left">
+      <span class="campaign-pill">CAMPAÑA 2025 / 2026 · SEMILLERO OFICIAL</span>
+      <h1>Catálogo Técnico de Semillas &amp; Genética Aplicada</h1>
+      <p>
+        Seleccioná el cultivo para explorar la ficha agronómica completa, la empresa elaboradora,
+        el comportamiento sanitario y las regiones donde mejor se adapta cada semilla.
+      </p>
+      <div class="benefits-row">
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined notranslate" translate="no">verified</span>
+          <span><strong>Seguro de Resiembra 100%</strong> ante granizo o planchado</span>
+        </div>
+        <div class="benefit-chip">
+          <span class="material-symbols-outlined notranslate" translate="no">ac_unit</span>
+          <span><strong>Guarda en Cámara Fría</strong> sin costo adicional</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CROP ACCESS CARDS -->
+  <section *ngIf="!isCatalogTableView()" class="lehmann-categories">
+    <button
+      *ngFor="let cat of catalogCategories"
+      class="lehmann-cat-card"
+      [class.selected]="cropFilter() === cat.code"
+      (click)="selectCrop(cat.code)">
+      <div class="cat-header">
+        <div class="cat-icon-box" [style.background]="cat.color">
+          <span class="material-symbols-outlined notranslate" translate="no">{{ cat.icon }}</span>
+        </div>
+        <span class="cat-title">{{ cat.title }}</span>
+      </div>
+      <p class="cat-desc">{{ cat.subtitle }}</p>
+    </button>
+  </section>
+
+  <!-- 3. LOADING / ERROR / EMPTY STATES -->
+  <div *ngIf="!isCatalogTableView() && loading()" class="state-panel">
+    <mat-spinner diameter="44"></mat-spinner>
+    <span>Cargando fichas técnicas de semillas…</span>
+  </div>
+
+  <div *ngIf="!loading() && errorMessage()" class="state-panel error-panel">
+    <mat-icon class="icon-error notranslate" translate="no">error_outline</mat-icon>
+    <span>{{ errorMessage() }}</span>
+    <button mat-flat-button color="primary" (click)="loadSeeds()">Reintentar</button>
+  </div>
+
+  <div *ngIf="!isCatalogTableView() && !loading() && !errorMessage() && filteredSeeds().length === 0" class="state-panel">
+    <mat-icon class="notranslate" translate="no">inventory_2</mat-icon>
+    <span>No hay semillas registradas para el filtro seleccionado.</span>
+    <button mat-stroked-button (click)="selectCrop('TODOS')">Ver todos los cultivos</button>
+  </div>
+
+  <!-- 4. GRID OF TECHNICAL SHEETS AS ORDERED CARDS -->
+  <section *ngIf="!isCatalogTableView() && !loading() && !errorMessage() && filteredSeeds().length > 0" class="seeds-cards-grid">
+
+    <article class="seed-product-card" *ngFor="let seed of filteredSeeds()">
+
+      <!-- A. Product header + manufacturer + technology -->
+      <header class="seed-card-top">
+        <div class="seed-title-block">
+          <div class="seed-badges-line">
+            <span class="crop-tag">{{ seed.cropName }}</span>
+            <span class="tech-tag">Tecnologías disponibles {{ seed.technologyBadge }}</span>
+            <span class="cycle-tag" [ngClass]="(seed.cycle || 'medio').toLowerCase()">
+              Ciclo {{ seed.cycleSheet }}
+            </span>
+            <span class="status-pill" [class.active]="seed.active">
+              ● {{ seed.active ? 'Disponible' : 'Sin stock' }}
+              <ng-container *ngIf="seed.stock !== undefined"> ({{ seed.stock }} bolsas)</ng-container>
+            </span>
+          </div>
+
+          <h2 class="seed-variety-name">
+            {{ seed.name }}
+            <small class="seed-db-id">{{ seed.code || ('Código #' + seed.id) }}</small>
+          </h2>
+
+          <div class="elaborador-box">
+            <span class="material-symbols-outlined notranslate" translate="no">domain_verification</span>
+            <div>
+              <strong>Elaborado por:</strong> {{ seed.manufacturer }}
+              <span class="elaborador-sub">{{ seed.licenseOrigin }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="seed-top-actions">
+          <button *ngIf="!isAdminMode()" class="btn-add-quote" (click)="addToQuote(seed)">
+            <span class="material-symbols-outlined notranslate" translate="no">add_shopping_cart</span>
+            Añadir al carrito
+          </button>
+
+          <!-- EDIT AND DELETE BUTTONS (ONLY VISIBLE IN /admin/panel) -->
+          <ng-container *ngIf="isAdminMode()">
+            <a
+              [routerLink]="['/admin/panel', seed.id, 'edit']"
+              class="btn-edit-seed"
+              title="Editar ficha técnica y sanidad de la semilla">
+              <span class="material-symbols-outlined notranslate" translate="no">edit</span>
+              Editar
+            </a>
+
+            <button
+              type="button"
+              class="btn-delete-seed"
+              [disabled]="deletingIds().has('' + seed.id)"
+              (click)="deleteSeed(seed)"
+              title="Eliminar semilla">
+              <span class="material-symbols-outlined notranslate" translate="no">delete</span>
+              {{ deletingIds().has('' + seed.id) ? 'Eliminando…' : 'Eliminar' }}
+            </button>
+          </ng-container>
+        </div>
+      </header>
+
+      <!-- Descriptive summary -->
+      <p class="seed-summary-text">
+        <ng-container *ngIf="seed.description">{{ seed.description }} </ng-container>
+        <ng-container *ngIf="seed.characteristics">{{ seed.characteristics }}</ng-container>
+        <ng-container *ngIf="!seed.description && !seed.characteristics">
+          Estabilidad y potencial en todos los ambientes.
+        </ng-container>
+      </p>
+
+      <!-- B. The 3 ordered inner cards -->
+      <div class="seed-inner-cards">
+
+        <!-- Inner card 1: Agronomic characteristics -->
+        <div class="inner-box agro-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">analytics</span>
+            Características Agronómicas
+          </h3>
+          <div class="specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Cruzamiento</span>
+              <strong class="spec-val">{{ seed.crossingSheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Ciclo</span>
+              <strong class="spec-val">{{ seed.cycleSheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Madurez relativa</span>
+              <strong class="spec-val">{{ seed.maturitySheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Días a floración</span>
+              <strong class="spec-val">{{ seed.floweringDaysSheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Tipo y color de grano</span>
+              <strong class="spec-val">{{ seed.grainColorSheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Altura de planta (m)</span>
+              <strong class="spec-val">{{ seed.plantHeightSheet }}</strong>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Número de hileras</span>
+              <strong class="spec-val">{{ seed.rowCountSheet }}</strong>
+            </div>
+            <div class="spec-item highlight">
+              <span class="spec-label">Rinde potencial</span>
+              <strong class="spec-val">{{ seed.yieldSheet }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inner card 2: Health behavior -->
+        <div class="inner-box health-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">shield_with_heart</span>
+            Comportamiento Sanitario
+          </h3>
+          <ul class="sanidad-list">
+            <li *ngFor="let item of seed.healthSheet">
+              <span class="sanidad-name">{{ item.name }}:</span>
+              <span class="stars-row" [title]="item.points + ' de 5'">
+                <span
+                  *ngFor="let isFilled of starsArray(item.points)"
+                  class="star"
+                  [class.filled]="isFilled">★</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Inner card 3: Where the seed adapts -->
+        <div class="inner-box zones-box">
+          <h3>
+            <span class="material-symbols-outlined notranslate" translate="no">location_on</span>
+            Dónde se adapta la semilla
+          </h3>
+          <p class="zones-helper">Regiones agroecológicas recomendadas para expresar su máximo rinde:</p>
+          <div class="zones-chips">
+            <span class="zone-chip" *ngFor="let z of seed.zonesSheet">
+              <span class="material-symbols-outlined notranslate" translate="no">check_circle</span>
+              {{ z }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+  </section>
+</main>

@@ -1,0 +1,64 @@
+@if (successMessage) {
+  <p>{{ successMessage }}</p>
+}
+
+<div class="pagina-header">
+  <div class="pagina-titulo">
+    <h1>Gestión de clientes</h1>
+    <span>Administrá, consultá y gestioná los clientes registrados en AgroEco.</span>
+  </div>
+
+  <button type="button" (click)="openCreateCustomer()">
+    <span class="material-symbols-outlined">person_add</span>
+    Nuevo cliente
+  </button>
+</div>
+
+<div class="listado-header">
+  <div>
+    <h2>Listado de clientes</h2>
+    <span>Consultá la información de los clientes registrados.</span>
+  </div>
+
+  <div class="buscador">
+    <input
+      type="text"
+      placeholder="Buscar por nombre, email o CUIT..."
+      [value]="searchTerm"
+      (input)="searchCustomers($any($event.target).value)"
+    />
+  </div>
+</div>
+
+<app-table
+  [columns]="columns"
+  [data]="customers"
+  (edit)="editCustomer($event)"
+  (remove)="deleteCustomer($event)"
+></app-table>
+<app-modal
+  [open]="isModalOpen"
+  [title]="modalType === 'form'
+    ? (selectedCustomer ? 'Editar cliente' : 'Nuevo cliente')
+    : 'Eliminar cliente'"
+  (close)="closeModal()"
+>
+
+  @if (modalType === 'form') {
+    <app-customer-form
+      [customer]="selectedCustomer"
+      [serverError]="serverError"
+      (save)="saveCustomer($event)"
+      (cancel)="closeModal()"
+    />
+  }
+
+  @if (modalType === 'delete') {
+    <app-customer-delete
+      [customer]="customerToDelete"
+      (confirm)="confirmDeletion($event)"
+      (cancel)="closeModal()"
+    />
+  }
+
+</app-modal>

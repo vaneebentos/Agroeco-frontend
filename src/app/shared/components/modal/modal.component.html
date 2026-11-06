@@ -1,18 +1,18 @@
 
-@if (abierto) {
-  <div class="modal-overlay" (click)="cerrarModal()">
+@if (open) {
+  <div class="modal-overlay" (click)="closeModal()">
 
     <div
       class="modal-contenido"
       (click)="$event.stopPropagation()"
     >
       <div class="modal-header">
-        <h2>{{ titulo }}</h2>
+        <h2>{{ title }}</h2>
 
         <button
           type="button"
           class="btn-cerrar"
-          (click)="cerrarModal()"
+          (click)="closeModal()"
           aria-label="Cerrar modal"
         >
           &times;

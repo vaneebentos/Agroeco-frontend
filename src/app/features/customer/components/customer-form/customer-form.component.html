@@ -1,0 +1,60 @@
+<form [formGroup]="form" (ngSubmit)="saveCustomer()">
+
+    <!-- Name -->
+    <div>
+        <label for="nombre">Nombre</label>
+        <input id="nombre" type="text" formControlName="name" placeholder="Ingrese el nombre" />
+
+        @if (getError('name'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    <!-- Email -->
+    <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="Ingrese el email" />
+
+        @if (getError('email'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    <!-- Phone -->
+    <div>
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" type="text" formControlName="phone" placeholder="Ingrese el teléfono" />
+
+        @if (getError('phone'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+    <div>
+        <label for="cuit">CUIT</label>
+        <input id="cuit" type="text" formControlName="cuit" placeholder="Ingrese el CUIT" />
+
+        @if (getError('cuit'); as error) {
+        <small>{{ error }}</small>
+        }
+    </div>
+
+
+    @if (serverError) {
+    <div class="error-servidor">
+        {{ serverError }}
+    </div>
+    }
+
+    <!-- Buttons -->
+    <div>
+        <button type="submit">
+            {{ isEditMode ? 'Actualizar cliente' : 'Crear cliente' }}
+        </button>
+
+        <button type="button" (click)="cancelForm()">
+            Cancelar
+        </button>
+    </div>
+
+</form>

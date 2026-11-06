@@ -1,30 +1,31 @@
 import { Routes } from '@angular/router';
 
-import { SemillaListComponent } from './semilla-list/semilla-list.component';
-import { SemillaFormComponent } from './semilla-form/semilla-form.component';
+import { SeedListComponent } from './seed-list/seed-list.component';
+import { SeedFormComponent } from './seed-form/seed-form.component';
 
-import { ClienteListComponent } from './features/cliente/components/cliente-list/cliente-list.component';
-import { ClienteFormComponent } from './features/cliente/components/cliente-form/cliente-form.component';
+import { CustomerListComponent } from './features/customer/components/customer-list/customer-list.component';
+import { CustomerFormComponent } from './features/customer/components/customer-form/customer-form.component';
 
-import { CotizacionComponent } from './features/cotizacion/cotizacion.component';
+import { QuoteComponent } from './features/quote/quote.component';
 
 export const routes: Routes = [
-  // Vista pública de semillas
+  // Public seed view
   { path: '', redirectTo: '/semillas', pathMatch: 'full' },
-  { path: 'semillas', component: SemillaListComponent },
-  { path: 'semilla/:cultivo', component: SemillaListComponent },
+  { path: 'semillas', component: SeedListComponent },
+  { path: 'semilla/:cultivo', component: SeedListComponent },
 
-  // Administración de semillas
-  { path: 'admin/panel', component: SemillaListComponent },
-  { path: 'admin/panel/new', component: SemillaFormComponent },
-  { path: 'admin/panel/:id/edit', component: SemillaFormComponent },
+  // Seed administration
+  { path: 'admin/panel', component: SeedListComponent },
+  { path: 'admin/panel/catalogo', component: SeedListComponent },
+  { path: 'admin/panel/new', component: SeedFormComponent },
+  { path: 'admin/panel/:id/edit', component: SeedFormComponent },
 
-  // Módulo de clientes
-  { path: 'admin/panel/clientes', component: ClienteListComponent },
-  { path: 'admin/panel/clientes/form', component: ClienteFormComponent },
+  // Customers module
+  { path: 'admin/panel/clientes', component: CustomerListComponent },
+  { path: 'admin/panel/clientes/form', component: CustomerFormComponent },
 
-  // Cotización
-  { path: 'cotizacion', component: CotizacionComponent },
+  // Quote
+  { path: 'cotizacion', component: QuoteComponent },
 
   { path: '**', redirectTo: '/semillas' },
 ];

@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter } from 'rxjs';
-import { CotizacionService } from '../../services/cotizacion.service';
+import { QuoteService } from '../../services/quote.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,19 +12,19 @@ import { CotizacionService } from '../../services/cotizacion.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-  cotizacionService = inject(CotizacionService);
+  quoteService = inject(QuoteService);
   private readonly router = inject(Router);
 
   isLargeText = false;
   isHighContrast = false;
-  esModoAdmin = false;
+  isAdminMode = false;
 
   constructor() {
-    this.esModoAdmin = this.router.url.includes('admin');
+    this.isAdminMode = this.router.url.includes('admin');
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
       .subscribe(event => {
-        this.esModoAdmin = event.urlAfterRedirects.includes('admin');
+        this.isAdminMode = event.urlAfterRedirects.includes('admin');
       });
   }
 
